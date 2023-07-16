@@ -1,3 +1,4 @@
+# Импортируем необходимые библиотеки и модули
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,9 +7,10 @@ from app.models import Camera
 from app.services.base import CRUDBase
 from app.services.utils import attach_zones, input_to_model_converter, split
 
-
+# Класс CRUDCamera наследуется от базового класса CRUDBase и предоставляет методы для взаимодействия с объектами Camera в базе данных
 class CRUDCamera(CRUDBase):
 
+    # Метод get_object получает объект Camera по его ID
     async def get_object(self, input_obj, session: AsyncSession):
         data = input_obj.dict()
         cam_id = split(data['metadata']['cam_id'])
@@ -20,6 +22,7 @@ class CRUDCamera(CRUDBase):
         obj = obj.scalars().first()
         return obj
 
+    # Метод create создает новый объект Camera в базе данных
     async def create(self, input_obj, session: AsyncSession):
         data = input_obj.dict()
         new_obj = input_to_model_converter(data)
@@ -29,6 +32,7 @@ class CRUDCamera(CRUDBase):
         await session.refresh(db_save)
         return db_save
 
+    # Метод update обновляет существующий объект Camera в базе данных
     async def update(self, input_obj, exist_obj, session: AsyncSession):
         new_data = input_obj.dict()
         db_obj = jsonable_encoder(exist_obj)
@@ -43,6 +47,7 @@ class CRUDCamera(CRUDBase):
         await session.refresh(exist_obj)
         return exist_obj
 
+    # Метод get_all_objects_with_zones возвращает все объекты Camera с их зонами
     async def get_all_objects_with_zones(self, session: AsyncSession):
         cameras = await session.execute(select(self.model))
         cameras = cameras.scalars().all()
@@ -51,6 +56,7 @@ class CRUDCamera(CRUDBase):
             info.append(await attach_zones(camera, session))
         return info
 
+    # Метод get_by_id возвращает объект Camera по его ID с его зонами
     async def get_by_id(self, camera_id: int, session: AsyncSession):
         camera = await session.execute(
             select(self.model).where(self.model.id == camera_id)
@@ -58,5 +64,5 @@ class CRUDCamera(CRUDBase):
         camera = camera.scalars().first()
         return await attach_zones(camera, session)
 
-
+# Создаем экземпляр класса CRUDCamera
 camera_crud = CRUDCamera(Camera)

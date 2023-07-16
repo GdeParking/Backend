@@ -1,3 +1,4 @@
+# Импортируем необходимые библиотеки и модули
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -6,14 +7,11 @@ from app.models import Zone
 from app.services.base import CRUDBase
 from app.services.utils import split
 
-
+# Класс CRUDZone наследуется от базового класса CRUDBase и предоставляет методы для взаимодействия с объектами Zone в базе данных
 class CRUDZone(CRUDBase):
 
-    async def update_zones(
-            self, camera_input,
-            camera_id,
-            session: AsyncSession
-    ):
+    # Метод update_zones обновляет зоны для определенной камеры
+    async def update_zones(self, camera_input, camera_id, session: AsyncSession):
         data = camera_input.dict()
         input_zones = data['detection_result']
         zones_internal_ids = list(map(split, input_zones.keys()))
@@ -42,6 +40,7 @@ class CRUDZone(CRUDBase):
             await self._enrich_with_coords(db_zone, session)
         await session.commit()
 
+    # Метод _enrich_with_coords обогащает зону координатами, если они доступны
     async def _enrich_with_coords(self, zone, session):
         if zone.long and zone.lat:
             return zone
@@ -57,5 +56,5 @@ class CRUDZone(CRUDBase):
         await session.refresh(zone)
         return zone
 
-
+# Создаем экземпляр класса CRUDZone
 zone_crud = CRUDZone(Zone)
