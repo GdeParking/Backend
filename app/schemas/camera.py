@@ -6,9 +6,8 @@ from app.schemas.zone import ZoneToFront
 
 
 class CameraMetadata(BaseModel):
-    cam_id: str
-    cam_address: str
-    park_places_nb: int
+    address: str
+    parking_places: int
     timezone: str
     update_period: int
 
@@ -20,7 +19,6 @@ class CameraInput(BaseModel):
 
 
 class CameraWithZones(BaseModel):
-    id: int
     address: str
     parking_places: int
     timezone: str

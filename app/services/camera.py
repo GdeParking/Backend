@@ -1,4 +1,4 @@
-# Импортируем необходимые библиотеки и модули
+# Import necessary libraries and modules
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,13 +7,13 @@ from app.models import Camera
 from app.services.base import CRUDBase
 from app.services.utils import attach_zones, input_to_model_converter, split
 
-# Класс CRUDCamera наследуется от базового класса CRUDBase и предоставляет методы для взаимодействия с объектами Camera в базе данных
+# The CRUDCamera class inherits from the base class CRUDBase and provides methods for interacting with Camera objects in the database
 class CRUDCamera(CRUDBase):
 
-    # Метод get_object получает объект Camera по его ID
+    # The get_object method gets a Camera object by its ID
     async def get_object(self, input_obj, session: AsyncSession):
         data = input_obj.dict()
-        cam_id = split(data['metadata']['cam_id'])
+        cam_id = split(data['metadata']['id'])
         obj = await session.execute(
             select(self.model).where(
                 self.model.id == cam_id

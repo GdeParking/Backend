@@ -21,7 +21,7 @@ def upgrade():
     # Создаем таблицу 'camera' с указанными столбцами
     op.create_table(
         'camera',
-        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('id', sa.Integer(), sa.Sequence('camera_id_seq'), primary_key=True),
         sa.Column('address', sa.String(length=255), nullable=False),
         sa.Column('parking_places', sa.Integer(), nullable=True),
         sa.Column('timezone', sa.String(length=10), nullable=True),
@@ -32,7 +32,7 @@ def upgrade():
     # Создаем таблицу 'zone' с указанными столбцами
     op.create_table(
         'zone',
-        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('id', sa.Integer(), sa.Sequence('zone_id_seq'), primary_key=True),
         sa.Column('camera_id', sa.Integer(), nullable=True),
         sa.Column('internal_id', sa.Integer(), nullable=False),
         sa.Column('status', sa.Boolean(), nullable=True),

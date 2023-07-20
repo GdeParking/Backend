@@ -1,4 +1,4 @@
-# Импортируем необходимые модули и функции
+# Import necessary modules and functions
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,28 +7,28 @@ from app.services.camera import camera_crud
 from app.services.zone import zone_crud
 from app.schemas.camera import CameraInput
 
-# Создаем экземпляр APIRouter
+# Create an instance of APIRouter
 router = APIRouter()
 
-# Определяем маршрут POST для ввода данных камеры
+# Define the POST route for camera data input
 @router.post('/')
 async def camera_input(
         camera: CameraInput,
         session: AsyncSession = Depends(get_async_session),
 ):
     """
-    Эта функция принимает данные камеры и обновляет или создает новую камеру в базе данных.
+    This function accepts camera data and updates or creates a new camera in the database.
     """
-    # Проверяем, существует ли уже камера
+    # Check if the camera already exists
     existing_camera = await camera_crud.get_object(camera, session)
 
-    # Если камера существует, обновляем ее данные и зоны
+    # If the camera exists, update its data and zones
     if existing_camera:
         updated_camera = await camera_crud.update(camera, existing_camera, session)
         await zone_crud.update_zones(camera, updated_camera.id, session)
         return updated_camera
 
-    # Если камера не существует, создаем новую камеру и обновляем зоны
+    # If the camera does not exist, create a new camera and update the zones
     new_camera = await camera_crud.create(camera, session)
     await zone_crud.update_zones(camera, new_camera.id, session)
     return new_camera

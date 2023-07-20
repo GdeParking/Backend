@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Page</title>
+    <style>
+        body {
+            background-color: #0d0dad;
+            color: #FFFFFF;
+            font-family: Arial, sans-serif;
+        }
+
+        .admin-form input, .admin-form textarea, .admin-form button {
+            display: block;
+            width: 80%;
+            margin: 10px auto;
+            padding: 10px;
+        }
+
+        .admin-form input[type="text"], .admin-form input[type="file"], .admin-form textarea {
+            background-color: #FFFFFF;
+            color: #000000;
+        }
+
+        .admin-form input[type="submit"] {
+            background-color: #FFFFFF;
+            color: #000000;
+            cursor: pointer;
+        }
+
+        .checkbox-field {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-form">
+        <form action="/submit_admin_data" method="POST" enctype="multipart/form-data">
+            <input type="text" name="camera_id" placeholder="Номер камеры" required>
+            <input type="text" name="camera_ip" placeholder="IP или URL камеры" required>
+            <input type="text" name="camera_password" placeholder="Пароль от камеры" required>
+            <input type="text" name="camera_timezone" placeholder="Часовой пояс" required>
+            <input type="text" name="camera_address" placeholder="Географический адрес камеры" required>
+
+            <input type="file" name="file1" required>
+            <input type="file" name="file2" required>
+
+            <div class="checkbox-field">
+                <label for="share-data">
+                    <input type="checkbox" id="share-data" name="share_data">
+                    Agree to share data
+                </label>
+
+                <input type="submit" value="Submit" style="float: right;">
+            </div>
+        </form>
+    </div>
+</body>
+</html>
