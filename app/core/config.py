@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     # в продакшене следует использовать PostgreSQL или MySQL с асинхронными драйверами.
     # Для PostgreSQL: "postgresql+asyncpg://user:password@localhost/database"
     # Для MySQL: "mysql+aiomysql://user:password@localhost/database"
-    database_url: str = "postgresql+asyncpg://user:password@localhost/database"
+    database_url: str = "mysql+aiomysql://root:password@localhost:3306/mydatabase"
     # Секретный ключ для шифрования и расшифровки данных
     secret: str = 'Seacret'
 

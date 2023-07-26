@@ -27,19 +27,29 @@ class Camera(PreBase):  # New SQLAlchemy model
 
 
 # Создание базового класса для SQLAlchemy моделей
-Base = declarative_base(cls=PreBase)
+Base = declarative_base()
 
 # Создание асинхронного движка SQLAlchemy
 engine = create_async_engine(settings.database_url)
 
 # Создание фабрики сессий для асинхронного движка
-AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession)
+AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
 async def get_async_session():
     """
     Функция для получения асинхронной сессии SQLAlchemy.
     Эта функция автоматически закрывает сессию по окончании работы.
     """
-    async with AsyncSessionLocal() as asyncsession:
-        yield asyncsession
+    session = AsyncSessionLocal()
+    try:
+        yield session
+        await session.commit()
+    except Exception:
+        await session.rollback()
+        raise
+    finally:
+        await session.close()

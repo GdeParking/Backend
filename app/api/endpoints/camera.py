@@ -6,7 +6,7 @@ from app.core.db import get_async_session
 from app.services.camera import camera_crud
 from app.services.zone import zone_crud
 from app.schemas.camera import CameraInput
-
+from app.models.camera import Camera
 # Create an instance of APIRouter
 router = APIRouter()
 

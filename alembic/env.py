@@ -51,7 +51,7 @@ def do_run_migrations(connection):
 def run_migrations_online():
     # Создание подключения к базе данных
     connectable = create_engine(
-        config.get_section(config.config_ini_section),
+        os.environ['DATABASE_URL'],
         poolclass=pool.NullPool,
     )
 

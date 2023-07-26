@@ -35,3 +35,12 @@ app.include_router(main_router, prefix="/api")
 
 # Подключение директории "/static" для обслуживания статических файлов
 app.mount("/static", StaticFiles(directory="app/api/admin/static"), name="static")
+
+# Добавьте этот код в конец файла main.py, после определения всех роутов
+# Выводит список всех зарегистрированных маршрутов
+@app.get("/list_routes", response_class=HTMLResponse)
+async def list_routes():
+    routes = []
+    for route in app.routes:
+        routes.append(f"{route.path} - {route.methods}")
+    return "\n".join(routes)

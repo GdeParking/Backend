@@ -1,2 +1,3 @@
-from app.core.db import Base  # noqa
-from app.models import Camera, Zone # noqa
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
