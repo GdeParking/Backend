@@ -20,14 +20,12 @@ class CRUDCamera(CRUDBase):
         obj = obj.scalars().first()
         return obj
 
-    async def create(self, input_obj, session: AsyncSession):
-        data = input_obj.dict()
-        new_obj = input_to_model_converter(data)
-        db_save = self.model(**new_obj)
-        session.add(db_save)
+    async def create(self, camera_metadata, session: AsyncSession):
+        data_to_save = self.model(**camera_metadata)
+        session.add(data_to_save)
         await session.commit()
-        await session.refresh(db_save)
-        return db_save
+        await session.refresh(data_to_save)
+        return data_to_save
 
     async def update(self, input_obj, exist_obj, session: AsyncSession):
         new_data = input_obj.dict()
