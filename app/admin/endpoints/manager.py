@@ -35,11 +35,9 @@ async def add_camera(request: Request,
     camera_metadata = dict(form_data)
     parking_layout_content = await parking_layout.read()
     coordinates_content = await coordinates.read()
-    new_camera = await camera_crud.create(camera_metadata, session)
+    new_camera_id = await camera_crud.create(camera_metadata, session)
+
     #return new_camera, parking_layout_content, coordinates_content
-    print(new_camera)
-    pprint(parking_layout_content)
-    pprint(coordinates_content)
 
     return templates.TemplateResponse('manager_adminpanel.html', {"request": request})
 

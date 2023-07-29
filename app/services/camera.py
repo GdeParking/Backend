@@ -25,7 +25,13 @@ class CRUDCamera(CRUDBase):
         session.add(data_to_save)
         await session.commit()
         await session.refresh(data_to_save)
-        return data_to_save
+        camera_obj = await session.execute(
+            select(self.model).where(
+                self.model.cam_url == camera_metadata['cam_url']
+            )
+        )
+        camera_obj = camera_obj.scalars().first()
+        return camera_obj.id
 
     async def update(self, input_obj, exist_obj, session: AsyncSession):
         new_data = input_obj.dict()
