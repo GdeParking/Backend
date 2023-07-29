@@ -13,19 +13,19 @@ from app.api.endpoints.camera import camera_input
 from app.core.db import get_async_session
 
 from app.schemas.camera import CameraInput
-from app.managers.camera import camera_crud
+#from app.managers.camera import camera_crud
 from app.services.zone import zone_crud
 
-admin_router = APIRouter()
+manager_router = APIRouter()
 
 templates = Jinja2Templates(directory="app/templates")
 
-@admin_router.get('/manager', response_class=HTMLResponse)
+@manager_router.get('/', response_class=HTMLResponse)
 def get_manager_form(request: Request):
     return templates.TemplateResponse('manager_adminpanel.html', {"request": request})
 
 
-# @admin_router.post('/manager', response_class=HTMLResponse)
+# @manager_router.post('/', response_class=HTMLResponse)
 # async def add_camera(request: Request,
 #                form_data: TestForm = Depends(TestForm.as_form),
 #                parking_layout: UploadFile = File(...),
