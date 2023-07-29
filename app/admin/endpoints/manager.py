@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, UploadFile, File
+import json
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -15,6 +16,7 @@ from app.core.db import get_async_session
 from app.schemas.camera import CameraInput
 #from app.managers.camera import camera_crud
 from app.services.camera import camera_crud
+from app.services.utils import flatten_zone_data
 from app.services.zone import zone_crud
 
 manager_router = APIRouter()
@@ -34,8 +36,12 @@ async def add_camera(request: Request,
                session: AsyncSession = Depends(get_async_session)):
     camera_metadata = dict(form_data)
     parking_layout_content = await parking_layout.read()
-    coordinates_content = await coordinates.read()
-    new_camera_id = await camera_crud.create(camera_metadata, session)
+    camera_id = await camera_crud.create(camera_metadata, session)
+    data = await coordinates.read()
+    zones_dict = eval(data)
+    flattened_zones = flatten_zone_data(camera_id=camera_id, zones_dict=zones_dict)
+    await zone_crud.add_zones(zones=flattened_zones, session=session)
+
 
     #return new_camera, parking_layout_content, coordinates_content
 

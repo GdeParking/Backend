@@ -9,6 +9,14 @@ from app.services.utils import split
 
 class CRUDZone(CRUDBase):
 
+
+    async def add_zones(self, zones: list, session: AsyncSession):
+        for zone in zones:
+            zone_to_save = self.model(**zone)
+            session.add(zone_to_save)
+            await session.commit()
+            await session.refresh(zone_to_save)
+
     async def update_zones(
             self, camera_input,
             camera_id,

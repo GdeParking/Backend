@@ -9,6 +9,15 @@ from app.schemas.zone import ZoneToFront
 FORMAT = '%Y-%m-%d %H:%M:%S'
 
 
+def flatten_zone_data(camera_id: int, zones_dict: dict):
+    return [{'camera_id': camera_id,
+             'internal_id': internal_id,
+             'long': zones_dict[internal_id]['long'],
+             'lat': zones_dict[internal_id]['lat']}
+              for internal_id in zones_dict]
+
+
+
 def split(key):
     return int(key.split('_')[-1])
 
