@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: 2a04ef5a2aef
+Revision ID: ad339ef2272d
 Revises: 
-Create Date: 2023-07-29 10:52:25.564981
+Create Date: 2023-07-29 13:16:47.521992
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '2a04ef5a2aef'
+revision = 'ad339ef2272d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -35,9 +35,11 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('camera_id', sa.Integer(), nullable=True),
     sa.Column('internal_id', sa.Integer(), nullable=False),
-    sa.Column('status', sa.Boolean(), nullable=True),
     sa.Column('long', sa.Float(), nullable=True),
     sa.Column('lat', sa.Float(), nullable=True),
+    sa.Column('registered_at', sa.TIMESTAMP(), nullable=True),
+    sa.Column('updated_at', sa.TIMESTAMP(), nullable=True),
+    sa.Column('status', sa.Boolean(), nullable=True),
     sa.ForeignKeyConstraint(['camera_id'], ['camera.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
