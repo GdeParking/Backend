@@ -7,7 +7,7 @@ from app.models.mixins import TimestampMixin
 
 
 class Camera(Base, TimestampMixin):
-    cam_url = Column(String(255), nullable=True)
+    cam_url = Column(String(255), nullable=False, unique=True)
     timezone = Column(String(10), nullable=True)
     address = Column(String(255), nullable=True)
     update_period = Column(Integer, default=None)
