@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 import json
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import select, insert
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 from starlette.responses import HTMLResponse
@@ -36,17 +37,16 @@ async def add_camera(request: Request,
                session: AsyncSession = Depends(get_async_session)):
     camera_metadata = dict(form_data)
     parking_layout_content = await parking_layout.read()
-    camera_id = await camera_crud.create(camera_metadata, session)
-    data = await coordinates.read()
-    zones_dict = eval(data)
-    flattened_zones = flatten_zone_data(camera_id=camera_id, zones_dict=zones_dict)
-    await zone_crud.add_zones(zones=flattened_zones, session=session)
-
-
-    #return new_camera, parking_layout_content, coordinates_content
-
-    return templates.TemplateResponse('manager_adminpanel.html', {"request": request})
-
+    try:
+        camera_id = await camera_crud.create(camera_metadata, session)
+        data = await coordinates.read()
+        zones_dict = eval(data)
+        flattened_zones = flatten_zone_data(camera_id=camera_id, zones_dict=zones_dict)
+        await zone_crud.add_zones(zones=flattened_zones, session=session)
+        return templates.TemplateResponse('manager_adminpanel.html', {"request": request})
+    except IntegrityError as ex:
+        await session.rollback()
+        raise HTTPException(status_code=400, detail='Камера с этим url уже есть в базе данных.')
 
 # async def camera_input(
 #         camera: CameraInput,
