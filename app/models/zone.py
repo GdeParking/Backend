@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, TIMESTAMP
+from sqlalchemy.orm import relationship
 
 from app.core.db import Base
 from app.models.mixins import TimestampMixin
@@ -13,4 +14,5 @@ class Zone(Base, TimestampMixin):
     long = Column(Float, default=0) # extract from file
     lat = Column(Float, default=0) # extract from file
     status = Column(Boolean, default=False) # False at first, then update from CV
+    camera = relationship('Camera', back_populates='zones')
 
