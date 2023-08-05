@@ -9,7 +9,10 @@ from app.schemas.zone import ZoneToFront
 FORMAT = '%Y-%m-%d %H:%M:%S'
 
 
-def flatten_zone_data(camera_id: int, zones_dict: dict):
+def extract_zones(camera, coordinates):
+    camera_id = camera.id
+    zones_data = await coordinates.read()
+    zones_dict = eval(zones_data)
     return [{'camera_id': camera_id,
              'internal_id': internal_id,
              'long': zones_dict[internal_id]['long'],

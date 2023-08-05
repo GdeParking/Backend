@@ -9,16 +9,14 @@ from app.services.utils import attach_zones, input_to_model_converter, split
 
 class CRUDCamera(CRUDBase):
 
-    async def get_object(self, input_obj, session: AsyncSession):
-        data = input_obj.dict()
-        cam_id = split(data['metadata']['cam_id'])
-        obj = await session.execute(
+    async def get(self, camera_metadata: dict, session: AsyncSession):
+        camera = await session.execute(
             select(self.model).where(
-                self.model.id == cam_id
+                self.model.cam_url == camera_metadata['cam_url']
             )
         )
-        obj = obj.scalars().first()
-        return obj
+        camera = camera.scalars().first()
+        return camera
 
     async def create(self, camera_metadata, session: AsyncSession):
         data_to_save = self.model(**camera_metadata)
@@ -31,7 +29,7 @@ class CRUDCamera(CRUDBase):
             )
         )
         camera_obj = camera_obj.scalars().first()
-        return camera_obj.id
+        return camera_obj
 
     async def update(self, input_obj, exist_obj, session: AsyncSession):
         new_data = input_obj.dict()
