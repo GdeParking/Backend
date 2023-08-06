@@ -16,7 +16,7 @@ from app.core.db import get_async_session
 from app.schemas.camera import CameraInput
 #from app.managers.camera import camera_crud
 from app.services.camera import camera_crud
-from app.services.utils import flatten_zone_data, extract_zones
+from app.services.utils import flatten_zone_data
 from app.services.zone import zone_crud
 
 manager_router = APIRouter()
@@ -34,19 +34,19 @@ async def add_camera(request: Request,
                parking_layout: UploadFile = File(...),
                coordinates: UploadFile = File(...),
                session: AsyncSession = Depends(get_async_session)):
-
     camera_metadata = dict(form_data)
+    parking_layout_content = await parking_layout.read()
+    coordinates_content = await coordinates.read()
+
     existing_camera = await camera_crud.get(camera_metadata, session)
     if existing_camera:
-        updated_camera = await camera_crud.update(camera_metadata, session)
-        extracted_zones = extract_zones(updated_camera, coordinates)
-        await zone_crud.update_zones(zones=extracted_zones, session=session)
+        camera_crud.update(camera_metadata, session)
     else:
         new_camera = await camera_crud.create(camera_metadata, session)
-        extracted_zones = extract_zones(new_camera, coordinates)
-        await zone_crud.add_zones(zones=extracted_zones, session=session)
+        camera_id = new_camera.id
+        flattened_zones = flatten_zone_data(camera_id=camera_id, file_content=coordinates_content)
+        await zone_crud.add_zones(zones=flattened_zones, session=session)
 
-    parking_layout_content = await parking_layout.read()
     return templates.TemplateResponse('manager_adminpanel.html', {"request": request})
 
 
