@@ -31,19 +31,27 @@ class CRUDCamera(CRUDBase):
         camera_obj = camera_obj.scalars().first()
         return camera_obj
 
-    async def update(self, input_obj, exist_obj, session: AsyncSession):
-        new_data = input_obj.dict()
-        db_obj = jsonable_encoder(exist_obj)
+    async def update(self, existing_camera, camera_metadata: dict, session: AsyncSession):
+        for field, value in camera_metadata.items():
+            setattr(existing_camera, field, value)
 
-        new_obj = input_to_model_converter(new_data)
-
-        for field in db_obj:
-            if field in new_obj:
-                setattr(exist_obj, field, new_obj[field])
-        session.add(exist_obj)
+        session.add(existing_camera)
         await session.commit()
-        await session.refresh(exist_obj)
-        return exist_obj
+        await session.refresh(existing_camera)
+        return existing_camera
+
+        # new_data = input_obj.dict()
+        # db_obj = jsonable_encoder(exist_obj)
+        #
+        # new_obj = input_to_model_converter(new_data)
+        #
+        # for field in db_obj:
+        #     if field in new_obj:
+        #         setattr(exist_obj, field, new_obj[field])
+        # session.add(exist_obj)
+        # await session.commit()
+        # await session.refresh(exist_obj)
+        # return exist_obj
 
     async def get_all_objects_with_zones(self, session: AsyncSession):
         cameras = await session.execute(select(self.model))

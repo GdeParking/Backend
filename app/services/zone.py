@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.data.coordiantes import COORDINATES
@@ -10,45 +10,67 @@ from app.services.utils import split
 class CRUDZone(CRUDBase):
 
 
-    async def add_zones(self, zones: list, session: AsyncSession):
+    async def add_zones(self, camera_id: int, zones: list, session: AsyncSession):
         for zone in zones:
+            zone['camera_id'] = camera_id
             zone_to_save = self.model(**zone)
             session.add(zone_to_save)
             await session.commit()
             await session.refresh(zone_to_save)
 
-    async def update_zones(
-            self, camera_input,
-            camera_id,
-            session: AsyncSession
-    ):
-        data = camera_input.dict()
-        input_zones = data['detection_result']
-        zones_internal_ids = list(map(split, input_zones.keys()))
+    # async def add_zones(self, camera_id: int, zones: list, session: AsyncSession):
+    #     zone_objects = [self.model(**zone) for zone in zones]
+    #     session.add_all(zone_objects)
+    #     await session.commit()
+
+    async def delete_zones(self, camera_id: int, session: AsyncSession):
         existing_zones = await session.execute(
-            select(self.model).where(
-                self.model.camera_id == camera_id
-            )
+            select(self.model).where(self.model.camera_id == camera_id)
         )
         existing_zones = existing_zones.scalars().all()
-        for zone in existing_zones:
-            await session.refresh(zone)
-            if zone.internal_id in zones_internal_ids:
-                id_index = zones_internal_ids.index(zone.internal_id)
-                input_id = 'zone_' + str(zones_internal_ids.pop(id_index))
-                setattr(zone, 'status', input_zones[input_id])
-                await self._enrich_with_coords(zone, session)
-            else:
-                await session.delete(zone)
-        for zone_id in zones_internal_ids:
-            input_id = 'zone_' + str(zone_id)
-            db_zone = self.model(
-                internal_id=zone_id,
-                status=bool(input_zones[input_id]),
-                camera_id=camera_id
-            )
-            await self._enrich_with_coords(db_zone, session)
-        await session.commit()
+
+        if existing_zones:
+            zone_ids_to_delete = [zone.id for zone in existing_zones]
+            await session.execute(
+                delete(self.model).where(self.model.id.in_(zone_ids_to_delete)))
+            await session.commit()
+
+    # async def delete_zones(self,camera_id: int, session: AsyncSession):
+    #     existing_zones = await session.execute(
+    #         select(self.model).where(self.model.camera_id == camera_id)
+    #     )
+    #     existing_zones = existing_zones.scalars().all()
+    #     for zone in existing_zones:
+    #         await session.refresh(zone)
+    #         await session.delete(zone)
+    #     await session.commit()
+
+
+    # async def update_zones(self,camera_id: int, zones: list, session: AsyncSession):
+    #     existing_zones = await session.execute(
+    #         select(self.model).where(
+    #             self.model.camera_id == camera_id
+    #         )
+    #     )
+    #     existing_zones = existing_zones.scalars().all()
+    #     for zone in existing_zones:
+    #         await session.refresh(zone)
+    #         if zone.internal_id in [zone['id'] for zone in zones]:
+    #             id_index = zones_internal_ids.index(zone.internal_id)
+    #             input_id = 'zone_' + str(zones_internal_ids.pop(id_index))
+    #             setattr(zone, 'status', input_zones[input_id])
+    #             await self._enrich_with_coords(zone, session)
+    #         else:
+    #             await session.delete(zone)
+    #     for zone_id in zones_internal_ids:
+    #         input_id = 'zone_' + str(zone_id)
+    #         db_zone = self.model(
+    #             internal_id=zone_id,
+    #             status=bool(input_zones[input_id]),
+    #             camera_id=camera_id
+    #         )
+    #         await self._enrich_with_coords(db_zone, session)
+    #     await session.commit()
 
     async def _enrich_with_coords(self, zone, session):
         if zone.long and zone.lat:

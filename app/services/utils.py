@@ -10,10 +10,9 @@ from app.schemas.zone import ZoneToFront
 FORMAT = '%Y-%m-%d %H:%M:%S'
 
 
-def flatten_zone_data(camera_id: int, file_content: bytes) -> list[dict[str, int | float]]:
+def flatten_zone_data(file_content: bytes) -> list[dict[str, int | float]]:
     zones_dict = eval(file_content)
-    return [{'camera_id': camera_id,
-             'internal_id': internal_id,
+    return [{'internal_id': internal_id,
              'long': zones_dict[internal_id]['long'],
              'lat': zones_dict[internal_id]['lat']}
               for internal_id in zones_dict]

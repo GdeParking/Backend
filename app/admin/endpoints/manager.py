@@ -34,18 +34,21 @@ async def add_camera(request: Request,
                parking_layout: UploadFile = File(...),
                coordinates: UploadFile = File(...),
                session: AsyncSession = Depends(get_async_session)):
+
     camera_metadata = dict(form_data)
     parking_layout_content = await parking_layout.read()
     coordinates_content = await coordinates.read()
+    flattened_zones = flatten_zone_data(file_content=coordinates_content)
 
     existing_camera = await camera_crud.get(camera_metadata, session)
     if existing_camera:
-        camera_crud.update(camera_metadata, session)
+        await camera_crud.update(existing_camera, camera_metadata, session)
+        await zone_crud.delete_zones(existing_camera.id, session)
+        await zone_crud.add_zones(camera_id=existing_camera.id, zones=flattened_zones, session=session)
+
     else:
         new_camera = await camera_crud.create(camera_metadata, session)
-        camera_id = new_camera.id
-        flattened_zones = flatten_zone_data(camera_id=camera_id, file_content=coordinates_content)
-        await zone_crud.add_zones(zones=flattened_zones, session=session)
+        await zone_crud.add_zones(camera_id=new_camera.id, zones=flattened_zones, session=session)
 
     return templates.TemplateResponse('manager_adminpanel.html', {"request": request})
 
