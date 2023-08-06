@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block head %}
+<script>
+
+</script>
+{% endblock %}
+
+{% block content %}
+<h4>Тестовая форма</h4>
+        <form method="POST" enctype="multipart/form-data">
+            <label for="cam_url">IP или URL камеры:</label><br>
+            <input type="text" id="cam_url" name="cam_url"><br>
+            <label for="timezone">Часовой пояс:</label><br>
+            <input type="text" id="timezone" name="timezone"><br>
+            <label for="address">Географический адрес:</label><br>
+            <input type="text" id="address" name="address"><br>
+            <label for="update_period">Частота обновления данных:</label><br>
+            <input type="text" id="update_period" name="update_period"><br>
+            <label for="parking_layout">Разметка парковочных мест:</label><br>
+            <input type="file" id="parking_layout" name="parking_layout"><br>
+            <label for="coordinates">Географические координаты:</label><br>
+            <input type="file" id="coordinates" name="coordinates"><br>
+            <input type="checkbox" class="form-check-input" id="consent" name="consent">
+            <label class="form-check-label" for="consent">Я разрешаю записывать поток со своей камеры</label><br>
+            <input type="submit" value="Отправить">
+        </form>
+{% endblock %}

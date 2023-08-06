@@ -1,12 +1,22 @@
 from datetime import datetime
 
 from sqlalchemy import select
+from starlette.datastructures import UploadFile
 
 from app.models.zone import Zone
 from app.schemas.camera import CameraWithZones
 from app.schemas.zone import ZoneToFront
 
 FORMAT = '%Y-%m-%d %H:%M:%S'
+
+
+def flatten_zone_data(file_content: bytes) -> list[dict[str, int | float]]:
+    zones_dict = eval(file_content)
+    return [{'internal_id': internal_id,
+             'long': zones_dict[internal_id]['long'],
+             'lat': zones_dict[internal_id]['lat']}
+              for internal_id in zones_dict]
+
 
 
 def split(key):
