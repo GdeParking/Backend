@@ -1,14 +1,14 @@
 from datetime import datetime
 
 from fastapi import Form
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, Extra, HttpUrl
 
 from app.schemas.zone import ZoneToFront
 
 # TODO: decide where the schema should be in the structure
 
 class TestForm(BaseModel):
-    cam_url: str
+    cam_url: HttpUrl
     timezone: str
     address: str
     update_period: int
