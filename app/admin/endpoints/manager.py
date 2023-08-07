@@ -31,14 +31,14 @@ def get_manager_form(request: Request):
 @manager_router.post('/', response_class=HTMLResponse)
 async def add_camera(request: Request,
                form_data: TestForm = Depends(TestForm.as_form),
-               parking_layout: UploadFile = File(...),
+               layout: UploadFile = File(...),
                coordinates: UploadFile = File(...),
                session: AsyncSession = Depends(get_async_session)):
 
     camera_metadata = dict(form_data)
-    parking_layout_content = await parking_layout.read()
     coordinates_content = await coordinates.read()
-    flattened_zones = flatten_zone_data(file_content=coordinates_content)
+    layout_content = await layout.read()
+    flattened_zones = flatten_zone_data(coordinates_file=coordinates_content, layout_file=layout_content)
 
     existing_camera = await camera_crud.get(camera_metadata, session)
     if existing_camera:

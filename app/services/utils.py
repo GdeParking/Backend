@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from sqlalchemy import select
@@ -10,13 +11,20 @@ from app.schemas.zone import ZoneToFront
 FORMAT = '%Y-%m-%d %H:%M:%S'
 
 
-def flatten_zone_data(file_content: bytes) -> list[dict[str, int | float]]:
-    zones_dict = eval(file_content)
-    return [{'internal_id': internal_id,
-             'long': zones_dict[internal_id]['long'],
-             'lat': zones_dict[internal_id]['lat']}
-              for internal_id in zones_dict]
+def flatten_zone_data(coordinates_file: bytes, layout_file: bytes) -> list[dict[str, int | float]]:
+    zones_dict = eval(coordinates_file)
+    layout_string = layout_file.decode('utf-8').lstrip('"detect_zones": ')
+    layout_list = eval(layout_string)
 
+    layout_dict_indexed = {int(d.pop('name').lstrip('zone_')): dict(d.items()) for d in layout_list}
+
+    res = [{'internal_id': internal_id,
+            'long': zones_dict[internal_id]['long'],
+            'lat': zones_dict[internal_id]['lat']}
+            | layout_dict_indexed[internal_id]
+            for internal_id in zones_dict]
+
+    return res
 
 
 def split(key):
