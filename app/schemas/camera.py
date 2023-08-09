@@ -7,7 +7,7 @@ from app.schemas.zone import ZoneToFront
 
 # TODO: decide where the schema should be in the structure
 
-class TestForm(BaseModel):
+class TestForm(BaseModel): 
     cam_url: HttpUrl
     timezone: str
     address: str
