@@ -1,4 +1,6 @@
 from pydantic import BaseModel, Extra
+from enum import Enum
+
 
 
 class ZoneToFront(BaseModel):
@@ -10,3 +12,8 @@ class ZoneToFront(BaseModel):
 
     class Config:
         extra = Extra.ignore
+
+
+
+
+

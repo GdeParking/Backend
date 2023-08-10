@@ -3,13 +3,16 @@ from datetime import datetime
 from fastapi import Form
 from pydantic import BaseModel, Extra, HttpUrl
 
+from app.models.enums import UTCTimeZone
 from app.schemas.zone import ZoneToFront
+
 
 # TODO: decide where the schema should be in the structure
 
-class TestForm(BaseModel): 
+
+class TestForm(BaseModel):
     cam_url: HttpUrl
-    timezone: str
+    timezone: UTCTimeZone
     address: str
     update_period: int
     consent: bool
@@ -17,8 +20,8 @@ class TestForm(BaseModel):
     @classmethod
     def as_form(
             cls,
-            cam_url: str = Form(...),
-            timezone: str = Form(...),
+            cam_url: HttpUrl = Form(...),
+            timezone: UTCTimeZone = Form(...),
             address: str = Form(...),
             update_period: str = Form(...),
             consent: bool = Form(...)
