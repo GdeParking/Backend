@@ -12,7 +12,11 @@
             <label for="cam_url">IP или URL камеры:</label><br>
             <input type="text" id="cam_url" name="cam_url"><br>
             <label for="timezone">Часовой пояс:</label><br>
-            <input type="text" id="timezone" name="timezone"><br>
+            <select id="timezone" name="timezone">
+            {% for zone in UTCTimeZone.__members__.values() %}
+            <option value="{{ zone.value }}">{{ zone.value }}</option>
+            {% endfor %}
+            </select><br>
             <label for="address">Географический адрес:</label><br>
             <input type="text" id="address" name="address"><br>
             <label for="update_period">Частота обновления данных:</label><br>
