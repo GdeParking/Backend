@@ -5,12 +5,11 @@ from sqlalchemy.orm import relationship
 
 from app.core.db import Base
 from app.models.mixins import TimestampMixin
-from app.models.enums import UTCTimeZone
 
 
 class Camera(Base, TimestampMixin):
     cam_url = Column(String(255), nullable=False, unique=True) # TODO: validation with re
-    timezone = Column(UTCTimeZone, nullable=True) # TODO: use Enum
+    timezone = Column(String(10), nullable=True) # TODO: use Enum
     address = Column(String(255), nullable=True)
     update_period = Column(Integer, default=None)
     consent = Column(Boolean)
