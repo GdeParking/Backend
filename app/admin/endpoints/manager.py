@@ -24,10 +24,10 @@ def get_manager_form(request: Request):
 
 @manager_router.post('/', response_class=HTMLResponse)
 async def add_camera(request: Request,
-               form_data: TestForm = Depends(TestForm.as_form),
-               layout: UploadFile = File(...),
-               coordinates: UploadFile = File(...),
-               session: AsyncSession = Depends(get_async_session)):
+                     form_data: TestForm = Depends(TestForm.as_form),
+                     layout: UploadFile = File(...),
+                     coordinates: UploadFile = File(...),
+                     session: AsyncSession = Depends(get_async_session)):
 
     camera_metadata = dict(form_data)
     coordinates_content = await coordinates.read()
