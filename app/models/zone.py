@@ -13,6 +13,10 @@ class Zone(Base, TimestampMixin):
     # FIXME! вот тут добавили поля, удалить при поломке
     long = Column(Float, default=0) # extract from file
     lat = Column(Float, default=0) # extract from file
+    x = Column(Integer, default=0)
+    y = Column(Integer, default=0)
+    w = Column(Integer, default=0)
+    h = Column(Integer, default=0)
     status = Column(Boolean, default=False) # False at first, then update from CV
     camera = relationship('Camera', back_populates='zones')
 

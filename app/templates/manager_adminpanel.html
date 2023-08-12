@@ -12,13 +12,17 @@
             <label for="cam_url">IP или URL камеры:</label><br>
             <input type="text" id="cam_url" name="cam_url"><br>
             <label for="timezone">Часовой пояс:</label><br>
-            <input type="text" id="timezone" name="timezone"><br>
+            <select id="timezone" name="timezone">
+            {% for zone in UTCTimeZone.__members__.values() %}
+            <option value="{{ zone.value }}">{{ zone.value }}</option>
+            {% endfor %}
+            </select><br>
             <label for="address">Географический адрес:</label><br>
             <input type="text" id="address" name="address"><br>
             <label for="update_period">Частота обновления данных:</label><br>
             <input type="text" id="update_period" name="update_period"><br>
-            <label for="parking_layout">Разметка парковочных мест:</label><br>
-            <input type="file" id="parking_layout" name="parking_layout"><br>
+            <label for="layout">Разметка парковочных мест:</label><br>
+            <input type="file" id="layout" name="layout"><br>
             <label for="coordinates">Географические координаты:</label><br>
             <input type="file" id="coordinates" name="coordinates"><br>
             <input type="checkbox" class="form-check-input" id="consent" name="consent">
