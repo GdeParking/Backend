@@ -10,12 +10,13 @@ from app.services.base import CRUDBase
 class CRUDZone(CRUDBase):
 
     async def get_xywh_of_zones_by_camera_id(self, camera_id: int, session: AsyncSession):
-        q = select(Zone.internal_id, Zone.x, Zone.y, Zone.w, Zone.h).where(Camera.camera_id == camera_id)
+        q = select(Zone.internal_id, Zone.x, Zone.y, Zone.w, Zone.h).where(Zone.camera_id == camera_id)
         result = await session.execute(q)
-        zones = result.scalars().all()
+        zones = result.all()
         column_names = ('internal_id', 'x', 'y', 'w', 'h')
         json_zones = [dict(zip(column_names, zone)) for zone in zones]
         return json.dumps(json_zones)
+
 
     async def add_zones(self, camera_id: int, zones: list, session: AsyncSession):
         for zone in zones:
