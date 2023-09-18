@@ -13,6 +13,15 @@ from app.services.camera import camera_crud
 from app.services.utils import flatten_zone_data
 from app.services.zone import zone_crud
 
+# TODO: recommended structure
+# TODO: comments
+# TODO: parsers for the right format of files
+# TODO: right CRUD and DAL (DAO)
+# TODO: BasedDAO
+# TODO:     class Config:
+#         orm_mode = True
+
+
 manager_router = APIRouter()
 
 templates = Jinja2Templates(directory="app/templates")
@@ -21,6 +30,8 @@ templates = Jinja2Templates(directory="app/templates")
 def get_manager_form(request: Request):
     return templates.TemplateResponse('manager_adminpanel.html', {'request': request, 'UTCTimeZone': UTCTimeZone})
 
+# localhost:8000/admin/manager/
+# localhost:3000/admin/manager/
 
 @manager_router.post('/', response_class=HTMLResponse)
 async def add_camera(request: Request,
