@@ -93,32 +93,35 @@ async def add_camera(
         timezone: str = Form(...),
         address: str = Form(...),
         update_period: int = Form(...),
-        consent: bool = Form(...)):
+        coordinates: UploadFile = File(...),
+        consent: bool = Form(...),
+        session: AsyncSession = Depends(get_async_session)):
 
         camera = TestForm(cam_url=cam_url,
                           timezone=timezone,
                           address=address,
                           update_period=update_period,
-                          consent=consent,)
+                          consent=consent,
+                          )
         print(type(camera))
         print(camera.__dict__)
         return {"message": "Camera information and file uploaded successfully"}
 
     # Create a new camera record in the database
 
-    # coordinates_content = await coordinates.read()
-    # layout_content = await layout.read()
-    # flattened_zones = flatten_zone_data(coordinates_file=coordinates_content, layout_file=layout_content)
-    #
-    # existing_camera = await camera_crud.get(camera_metadata, session)
-    # if existing_camera:
-    #     await camera_crud.update(existing_camera, camera_metadata, session)
-    #     await zone_crud.delete_zones(existing_camera.id, session)
-    #     await zone_crud.add_zones(camera_id=existing_camera.id, zones=flattened_zones, session=session)
-    #
-    # else:
-    #     new_camera = await camera_crud.create(camera_metadata, session)
-    #     await zone_crud.add_zones(camera_id=new_camera.id, zones=flattened_zones, session=session)
+    coordinates_content = await coordinates.read()
+    #layout_content = await layout.read()
+    flattened_zones = flatten_zone_data(coordinates_file=coordinates_content, layout_file=layout_content)
+
+    existing_camera = await camera_crud.get(camera_metadata, session)
+    if existing_camera:
+        await camera_crud.update(existing_camera, camera_metadata, session)
+        await zone_crud.delete_zones(existing_camera.id, session)
+        await zone_crud.add_zones(camera_id=existing_camera.id, zones=flattened_zones, session=session)
+
+    else:
+        new_camera = await camera_crud.create(camera_metadata, session)
+        await zone_crud.add_zones(camera_id=new_camera.id, zones=flattened_zones, session=session)
 
 
 

@@ -1,5 +1,6 @@
-import json
+import csv
 from datetime import datetime
+from io import TextIOWrapper
 
 from sqlalchemy import select
 from starlette.datastructures import UploadFile
@@ -10,7 +11,16 @@ from app.schemas.zone import ZoneToFront
 
 FORMAT = '%Y-%m-%d %H:%M:%S'
 
+def process_coordinates_csv(uploaded_file: UploadFile):
+    file_wrapper = TextIOWrapper(uploaded_file, encoding='utf-8')
+    data = csv.DictReader(file_wrapper, delimiter=';')
+    with_translated_keys = [{'internal_id': zone['Подпись'],
+                             'lat': zone['Широта'],
+                             'long': zone['Долгота']} for zone in data]
+    return with_translated_keys
 
+
+# To be deprecated because file format has changed from txt to csv
 def flatten_zone_data(coordinates_file: bytes, layout_file: bytes) -> list[dict[str, int | float]]:
     zones_dict = eval(coordinates_file)
     layout_string = layout_file.decode('utf-8').lstrip('"detect_zones": ')
