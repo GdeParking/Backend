@@ -10,8 +10,8 @@ class ZoneToFront(BaseModel):
     long: float = None
     lat: float = None
 
-    class Config:
-        extra = Extra.ignore
+    # class Config:
+    #     extra = Extra.ignore
 
 
 

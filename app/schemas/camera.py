@@ -58,5 +58,5 @@ class CameraWithZones(BaseModel):
     last_connection: datetime
     zones: list[ZoneToFront]
 
-    class Config:
-        extra = Extra.ignore
+    # class Config:
+    #     extra = Extra.ignore
