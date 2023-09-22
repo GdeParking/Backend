@@ -11,8 +11,8 @@ from app.schemas.zone import ZoneToFront
 
 
 class TestForm(BaseModel):
-    cam_url: HttpUrl
-    timezone: UTCTimeZone
+    cam_url: str
+    timezone: str
     address: str
     update_period: int
     consent: bool
@@ -20,10 +20,10 @@ class TestForm(BaseModel):
     @classmethod
     def as_form(
             cls,
-            cam_url: HttpUrl = Form(...),
-            timezone: UTCTimeZone = Form(...),
+            cam_url: str = Form(...),
+            timezone: str = Form(...),
             address: str = Form(...),
-            update_period: str = Form(...),
+            update_period: int = Form(...),
             consent: bool = Form(...)
             ):
             return cls(
