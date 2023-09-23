@@ -1,5 +1,7 @@
 import csv
+import json
 from datetime import datetime
+from decimal import Decimal
 from io import TextIOWrapper
 
 from sqlalchemy import select
@@ -14,29 +16,38 @@ FORMAT = '%Y-%m-%d %H:%M:%S'
 def process_coordinates_csv(uploaded_file: UploadFile):
     file_wrapper = TextIOWrapper(uploaded_file, encoding='utf-8')
     data = csv.DictReader(file_wrapper, delimiter=';')
-    with_translated_keys = [{'internal_id': zone['Подпись'],
-                             'lat': zone['Широта'],
-                             'long': zone['Долгота']} for zone in data]
-    return with_translated_keys
+    coordinates_dict_list = [{'internal_id': int(zone['Подпись']),
+                             'lat': Decimal(zone['Широта']),
+                             'long': Decimal(zone['Долгота'])} for zone in data]
+    sorted_coordinates_dict_list = sorted(coordinates_dict_list, key=lambda x: x['internal_id'])
+    return sorted_coordinates_dict_list
 
 
-# To be deprecated because file format has changed from txt to csv
-def flatten_zone_data(coordinates_file: bytes, layout_file: bytes) -> list[dict[str, int | float]]:
-    zones_dict = eval(coordinates_file)
-    layout_string = layout_file.decode('utf-8').lstrip('"detect_zones": ')
-    layout_list = eval(layout_string)
-
-    layout_dict_indexed = {int(d.pop('name').lstrip('zone_')): dict(d.items()) for d in layout_list}
-
-    res = [{'internal_id': internal_id,
-            'long': zones_dict[internal_id]['long'],
-            'lat': zones_dict[internal_id]['lat']}
-            | layout_dict_indexed[internal_id]
-            for internal_id in zones_dict]
-
-    return res
+def process_layout_txt(uploaded_file: UploadFile):
+    file_wrapper = TextIOWrapper(uploaded_file, encoding='utf-8')
+    data = file_wrapper.read()
+    dict_data = json.loads(data)
+    layout_dict_list = [{'internal_id': int(zone['label']),
+                         'x': Decimal(zone['x']),
+                         'y': Decimal(zone['y']),
+                         'w': Decimal(zone['width']),
+                         'h': Decimal(zone['height'])}
+                        for zone in dict_data['boxes']]
+    sorted_layout_dict_list = sorted(layout_dict_list, key=lambda x: x['internal_id'])
+    return sorted_layout_dict_list
 
 
+def flatten_zone_data(coordinates_file: UploadFile, layout_file: UploadFile) -> list[dict[str, int | float]]:
+    sorted_coordinates_dict_list = process_coordinates_csv(coordinates_file)
+    sorted_layout_dict_list = process_layout_txt(layout_file)
+    flattened_list_of_dicts = []
+    for c_dict, l_dict in zip(sorted_coordinates_dict_list, sorted_layout_dict_list):
+        c_dict.update(l_dict)
+        flattened_list_of_dicts.append(c_dict)
+    return flattened_list_of_dicts
+
+
+# Utils from here on are for the old format of files and will be deprecated
 def split(key):
     return int(key.split('_')[-1])
 
