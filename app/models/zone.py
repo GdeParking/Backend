@@ -1,22 +1,20 @@
-from datetime import datetime
-
-from sqlalchemy import Boolean, Column, Numeric, ForeignKey, Integer, TIMESTAMP
-from sqlalchemy.orm import relationship
+from sqlalchemy import Numeric, ForeignKey
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from app.core.db import Base
+from app.models import Camera
 from app.models.mixins import TimestampMixin
 
 
 class Zone(Base, TimestampMixin):
-    camera_id = Column(Integer, ForeignKey('camera.id', ondelete='CASCADE')) # extract from Camera table
-    internal_id = Column(Integer, nullable=False) # extract from file
+    camera_id: Mapped[int] = mapped_column(ForeignKey('camera.id', ondelete='CASCADE'))
+    internal_id: Mapped[int] = mapped_column(nullable=False)  # extract from file
     # FIXME! вот тут добавили поля, удалить при поломке
-    long = Column(Numeric, default=0) # extract from file
-    lat = Column(Numeric, default=0) # extract from file
-    x = Column(Numeric, default=0)
-    y = Column(Numeric, default=0)
-    w = Column(Numeric, default=0)
-    h = Column(Numeric, default=0)
-    status = Column(Boolean, default=False) # False at first, then update from CV
-    camera = relationship('Camera', back_populates='zones')
-
+    long: Mapped[float] = mapped_column(Numeric, default=0)  # extract from file
+    lat: Mapped[float] = mapped_column(Numeric, default=0)  # extract from file
+    x: Mapped[float] = mapped_column(Numeric, default=0)
+    y: Mapped[float] = mapped_column(Numeric, default=0)
+    w: Mapped[float] = mapped_column(Numeric, default=0)
+    h: Mapped[float] = mapped_column(Numeric, default=0)
+    status: Mapped[bool] = mapped_column(default=False)  # False at first, then update from CV
+    camera: Mapped['Camera'] = relationship(back_populates='zones')

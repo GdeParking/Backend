@@ -5,6 +5,7 @@ from sqlalchemy import DateTime, Integer, String
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 
 from app.core.db import Base
+from app.models import Zone
 from app.models.mixins import TimestampMixin
 
 
@@ -16,4 +17,4 @@ class Camera(Base, TimestampMixin):
     consent: Mapped[bool]
     parking_places: Mapped[int] = mapped_column(Integer, default=0)
     last_connection: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
-    zones: Mapped[list['Zones']] = relationship(back_populates='camera')
+    zones: Mapped[list['Zone']] = relationship(back_populates='camera')

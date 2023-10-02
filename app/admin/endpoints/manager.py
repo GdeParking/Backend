@@ -93,7 +93,8 @@ async def add_camera(
         timezone: str = Form(...),
         address: str = Form(...),
         update_period: int = Form(...),
-        coordinates: UploadFile = File(...),
+        markingFile: UploadFile = File(...),
+        coordinatesFile: UploadFile = File(...),
         consent: bool = Form(...),
         session: AsyncSession = Depends(get_async_session)):
 
