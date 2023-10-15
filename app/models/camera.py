@@ -5,7 +5,6 @@ from sqlalchemy import DateTime, Integer, String
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 
 from app.core.db import Base
-from app.models import Zone
 from app.models.mixins import TimestampMixin
 
 

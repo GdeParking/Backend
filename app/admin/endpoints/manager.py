@@ -87,31 +87,49 @@ templates = Jinja2Templates(directory="app/templates")
 # The bastard of ChatGPT and the old handler
 # parameters are passed directly
 @manager_router.post("/upload-camera")
+# The endpoint where we use Depends and as_form
 async def add_camera(
-        request: Request,
-        cam_url: str = Form(...),
-        timezone: str = Form(...),
-        address: str = Form(...),
-        update_period: int = Form(...),
-        markingFile: UploadFile = File(...),
-        coordinatesFile: UploadFile = File(...),
-        consent: bool = Form(...),
+        form_data: TestForm = Depends(TestForm.as_form),
         session: AsyncSession = Depends(get_async_session)):
 
-        camera = TestForm(cam_url=cam_url,
-                          timezone=timezone,
-                          address=address,
-                          update_period=update_period,
-                          consent=consent,
-                          )
-        print(type(camera))
-        print(camera.__dict__)
-        return {"message": "Camera information and file uploaded successfully"}
+        return {"message": "Camera information and file uploaded successfully",
+                "layout": form_data.layout.filename,
+                "coordinates": form_data.coordinates.filename,
+                "form_data": form_data
+        }
+
+
+        # The endpoint where we use form fields one by one
+# async def add_camera(
+#         cam_url: str = Form(...),
+#         timezone: str = Form(...),
+#         address: str = Form(...),
+#         update_period: int = Form(...),
+#         layout: UploadFile = File(...),
+#         coordinates: UploadFile = File(...),
+#         consent: bool = Form(...),
+#         session: AsyncSession = Depends(get_async_session)):
+
+        # camera = TestForm(
+        #         cam_url=cam_url,
+        #         timezone=timezone,
+        #         address=address,
+        #         update_period=update_period,
+        #         # layout=layout,
+        #         # coordinates=coordinates,
+        #         consent=consent,
+        #         session=session,
+        # )
+        # print(cam_url)
+        # print(camera.__dict__)
+        # print(form_data.camera.layout.filename)
+        # # print(camera.coordinates.filename)
+        # return {"message": "Camera information and file uploaded successfully",
+        #         }
+
+
 
     # Create a new camera record in the database
-
-    # coordinates_content = await coordinates.read()
-    # #layout_content = await layout.read()
     # flattened_zones = flatten_zone_data(coordinates_file=coordinates_content, layout_file=layout_content)
     #
     # existing_camera = await camera_crud.get(camera_metadata, session)

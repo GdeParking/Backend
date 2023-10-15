@@ -11,6 +11,7 @@ from app.models.zone import Zone
 from app.schemas.camera import CameraWithZones
 from app.schemas.zone import ZoneToFront
 
+
 FORMAT = '%Y-%m-%d %H:%M:%S'
 
 def process_coordinates_csv(uploaded_file: UploadFile):

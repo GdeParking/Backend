@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from fastapi import Form
+from fastapi import Form, UploadFile, File
 from pydantic import BaseModel, Extra, HttpUrl
 
 from app.models.enums import UTCTimeZone
@@ -15,23 +15,29 @@ class TestForm(BaseModel):
     timezone: str
     address: str
     update_period: int
-    consent: bool
+    layout: UploadFile
+    coordinates: UploadFile
+    consent: bool = True
 
     @classmethod
     def as_form(
-            cls,
-            cam_url: str = Form(...),
-            timezone: str = Form(...),
-            address: str = Form(...),
-            update_period: int = Form(...),
-            consent: bool = Form(...)
-            ):
-            return cls(
+        cls,
+        cam_url: str = Form(...),
+        timezone: str = Form(...),
+        address: str = Form(...),
+        update_period: int = Form(...),
+        layout: UploadFile = File(...),
+        coordinates: UploadFile = File(...),
+        consent: bool = Form(...)
+        ):
+        return cls(
             cam_url=cam_url,
             timezone=timezone,
             address=address,
             update_period=update_period,
-            consent=consent,
+            layout=layout,
+            coordinates=coordinates,
+            consent=consent
         )
 
 

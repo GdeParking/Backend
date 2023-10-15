@@ -11,6 +11,7 @@ app = FastAPI(
     description=settings.app_description
 )
 
+
 app.state.debug = True
 
 origins = ['http://localhost:3000/',]

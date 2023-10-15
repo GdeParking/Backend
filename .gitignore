@@ -141,3 +141,5 @@ package-lock.json
 .stylelintrc.json
 
 poetry.lock
+
+/upload_files
