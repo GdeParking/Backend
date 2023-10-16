@@ -15,8 +15,6 @@ class TestForm(BaseModel):
     timezone: str
     address: str
     update_period: int
-    layout: UploadFile
-    coordinates: UploadFile
     consent: bool = True
 
     @classmethod
@@ -26,8 +24,6 @@ class TestForm(BaseModel):
         timezone: str = Form(...),
         address: str = Form(...),
         update_period: int = Form(...),
-        layout: UploadFile = File(...),
-        coordinates: UploadFile = File(...),
         consent: bool = Form(...)
         ):
         return cls(
@@ -35,8 +31,6 @@ class TestForm(BaseModel):
             timezone=timezone,
             address=address,
             update_period=update_period,
-            layout=layout,
-            coordinates=coordinates,
             consent=consent
         )
 
