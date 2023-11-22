@@ -17,6 +17,13 @@ class CRUDCamera(CRUDBase):
         camera = camera.scalars().first()
         return camera
 
+    # TODO: see how to get_all
+    async def get_all(self, camera_metadata: dict, session: AsyncSession):
+        cameras = await session.execute(
+            select(self.model).all()
+            )
+        return cameras
+
     async def create(self, camera_metadata, session: AsyncSession):
         data_to_save = self.model(**camera_metadata)
         session.add(data_to_save)
