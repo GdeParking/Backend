@@ -6,6 +6,9 @@ from app.services.zone import zone_crud
 
 router = APIRouter()
 
+@router.get('/all')
+async def get_all(session: AsyncSession = Depends(get_async_session)):
+    return await zone_crud.get_all(session)
 
 @router.get('/{camera_id}')
 async def get_xyhw_of_zones(

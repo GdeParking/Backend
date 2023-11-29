@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Camera
 from app.services.base import CRUDBase
+from app.services.zone import zone_crud
 
 
 class CRUDCamera(CRUDBase):
@@ -17,12 +18,16 @@ class CRUDCamera(CRUDBase):
         camera = camera.scalars().first()
         return camera
 
-    # TODO: see how to get_all
-    async def get_all(self, camera_metadata: dict, session: AsyncSession):
-        cameras = await session.execute(
-            select(self.model).all()
-            )
+    async def get_all(self, session: AsyncSession):
+        q = select(self.model)
+        result = await session.execute(q)
+        cameras = result.scalars().all()
         return cameras
+
+    async def get_all_with_zones(self, session: AsyncSession):
+        cameras = self.get_all(session)
+        zones = zone_crud.get_all(session)
+        return [c for c in cameras], [z for z in zones]
 
     async def create(self, camera_metadata, session: AsyncSession):
         data_to_save = self.model(**camera_metadata)

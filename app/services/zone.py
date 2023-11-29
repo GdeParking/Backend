@@ -11,6 +11,12 @@ from app.services.base import CRUDBase
 
 class CRUDZone(CRUDBase):
 
+    async def get_all(self, session: AsyncSession):
+        q = select(self.model)
+        result = await session.execute(q)
+        zones = result.scalars().all()
+        return zones
+
     async def get_xywh_of_zones_by_camera_id(self, camera_id: int, session: AsyncSession):
         q = select(Zone.internal_id, Zone.x, Zone.y, Zone.w, Zone.h).where(Zone.camera_id == camera_id)
         result = await session.execute(q)
