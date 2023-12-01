@@ -30,6 +30,9 @@ async def camera_input(
 async def get_all_cameras(session: AsyncSession = Depends(get_async_session)):
     return await camera_crud.get_all(session)
 
+@router.get('/get_all_with_zones')
+async def get_all_with_zones(session: AsyncSession = Depends(get_async_session)):
+    return await camera_crud.get_cameras_and_zones_with_joined_relationship(session)
 
 @router.get('/{camera_id}')
 async def get_camera(
@@ -38,6 +41,4 @@ async def get_camera(
 ):
     return await camera_crud.get_by_id(camera_id, session)
 
-@router.get('/get_all_with_zones')
-async def get_all_cameras(session: AsyncSession = Depends(get_async_session)):
-    return await camera_crud.get_all_with_zones(session)
+

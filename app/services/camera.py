@@ -1,8 +1,9 @@
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import select
+from sqlalchemy import select, join, text
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import aliased, joinedload, selectinload
 
-from app.models import Camera
+from app.models import Camera, Zone
 from app.services.base import CRUDBase
 from app.services.zone import zone_crud
 
@@ -18,16 +19,68 @@ class CRUDCamera(CRUDBase):
         camera = camera.scalars().first()
         return camera
 
+    async def get_by_id(self, camera_id: int, session: AsyncSession):
+        q = select(self.model).where(self.model.id == camera_id)
+        result = await session.execute(q)
+        camera = result.scalars().one()
+        return camera
+
     async def get_all(self, session: AsyncSession):
         q = select(self.model)
         result = await session.execute(q)
         cameras = result.scalars().all()
         return cameras
 
-    async def get_all_with_zones(self, session: AsyncSession):
-        cameras = self.get_all(session)
-        zones = zone_crud.get_all(session)
-        return [c for c in cameras], [z for z in zones]
+    async def get_united(self, session: AsyncSession):
+        q = select(self.model)
+        result = await session.execute(q)
+        cameras = result.scalars().all()
+        return cameras
+
+
+    async def get_cameras_and_zones_with_join (self, session: AsyncSession):
+
+        # Extraction with sa orm (core?) using join. # TODO: sort out columns with same names
+        c = aliased(self.model)
+        z = aliased(Zone)
+
+        q = select(c, z).join(c.zones)
+
+        result = await session.execute(q)
+        cameras_with_zones = result.scalars().all()
+        return cameras_with_zones
+
+
+    async def get_cameras_and_zones_with_joined_relationship (self, session: AsyncSession):
+
+        # Extraction with joinedload and relationship
+
+        c = aliased(self.model)
+        # q stands for query
+        q = (
+            select(c)
+            .options(joinedload(c.zones))
+        )
+
+        result = await session.execute(q)
+        # Add unique() to deal with repeating ids
+        cameras_with_zones = result.unique().scalars().all()
+        return cameras_with_zones
+
+    async def get_cameras_and_zones_with_selectin_relationship (self, session: AsyncSession):
+
+        # Extraction with selectinload and relationship
+
+        c = aliased(self.model)
+        q = (
+            select(c)
+            .options(selectinload(c.zones))
+        )
+
+        result = await session.execute(q)
+        # Add unique() to deal with repeating ids
+        cameras_with_zones = result.unique().scalars().all()
+        return cameras_with_zones
 
     async def create(self, camera_metadata, session: AsyncSession):
         data_to_save = self.model(**camera_metadata)
