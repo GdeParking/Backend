@@ -18,3 +18,6 @@ class Zone(Base, TimestampMixin):
     h: Mapped[float] = mapped_column(Numeric, default=0)
     status: Mapped[bool] = mapped_column(default=False)  # False at first, then update from CV
     camera: Mapped['Camera'] = relationship(back_populates='zones')
+
+    repr_cols_num = 5
+    repr_cols = tuple()

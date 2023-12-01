@@ -17,3 +17,6 @@ class Camera(Base, TimestampMixin):
     parking_places: Mapped[int] = mapped_column(Integer, default=0)
     last_connection: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     zones: Mapped[list['Zone']] = relationship(back_populates='camera')
+
+    repr_cols_num = 5
+    repr_cols = tuple()
