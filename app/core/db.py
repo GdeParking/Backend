@@ -1,11 +1,9 @@
-from sqlalchemy import Column, Integer
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, declarative_base, declared_attr, sessionmaker, Mapped, mapped_column
 
 from app.core.config import settings
 
-# The old way to define Base
-
+""""The old way to define Base"""
 # class PreBase:
 #     @declared_attr
 #     def __tablename__(cls):
@@ -15,7 +13,7 @@ from app.core.config import settings
 
 #Base = declarative_base(cls=PreBase)
 
-# Experimental way to define Base
+"""Experimental way to define Base without using PreBase"""
 class Base(DeclarativeBase):
 
     @declared_attr
@@ -24,7 +22,7 @@ class Base(DeclarativeBase):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    # Sophisticated repr
+    """Sophisticated repr. Displays one n first columns plus specified ones"""
     repr_cols_num = 3
     repr_cols = tuple()
 
@@ -36,7 +34,7 @@ class Base(DeclarativeBase):
                 cols.append(f"{col}={getattr(self, col)}")
         return f"<{self.__class__.__name__} {', '.join(cols)}>"
 
-    # Simple repr
+    """Simple repr. Displays all columns available"""
     # def __repr__(self):
     #     columns = [f"{column}={(getattr(self, column))}"
     #                for column in self.__table__.columns.keys()]
