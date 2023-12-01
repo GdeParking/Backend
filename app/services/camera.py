@@ -63,8 +63,10 @@ class CRUDCamera(CRUDBase):
         )
 
         result = await session.execute(q)
+        print(f'result={result}')
         # Add unique() to deal with repeating ids
         cameras_with_zones = result.unique().scalars().all()
+        print(f'cameras_with_zones=`{cameras_with_zones}')
         return cameras_with_zones
 
     async def get_cameras_and_zones_with_selectin_relationship (self, session: AsyncSession):
@@ -80,6 +82,7 @@ class CRUDCamera(CRUDBase):
         result = await session.execute(q)
         # Add unique() to deal with repeating ids
         cameras_with_zones = result.unique().scalars().all()
+        print(f'cameras_with_zones=`{cameras_with_zones}')
         return cameras_with_zones
 
     async def create(self, camera_metadata, session: AsyncSession):
