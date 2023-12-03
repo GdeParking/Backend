@@ -41,7 +41,9 @@ class Base(DeclarativeBase):
     #     return f"<{self.__class__.__name__}> {', '.join(columns)}"
 
 
-engine = create_async_engine(settings.database_url)
+engine = create_async_engine(url=settings.database_url,
+                             echo=True,
+                             )
 
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession)
 
