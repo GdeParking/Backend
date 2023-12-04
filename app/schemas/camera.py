@@ -34,7 +34,30 @@ class TestForm(BaseModel):
             consent=consent
         )
 
+class CameraDTO(BaseModel):
+    id: int
+    cam_url: str
+    address: str
+    parking_places: int
 
+class ZoneDTO(BaseModel):
+    internal_id: int
+    long: float
+    lat: float
+    x: int
+    y: int
+    w: int
+    h: int
+
+class CameraWithZonesDTO(CameraDTO):
+    zones: list["ZoneDTO"]
+
+class CameraWithZonesLabeledDTO(BaseModel):
+    cameras: list["CameraWithZonesDTO"]
+
+
+
+"""Old schemas from now on"""
 class CameraMetadata(BaseModel):
     cam_id: str
     cam_address: str

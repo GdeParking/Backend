@@ -1,9 +1,12 @@
+import json
+
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import select, join, text
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import aliased, joinedload, selectinload
+from sqlalchemy.orm import aliased, joinedload, selectinload, contains_eager
 
 from app.models import Camera, Zone
+from app.schemas.camera import CameraWithZonesDTO, CameraWithZonesLabeledDTO
 from app.services.base import CRUDBase
 from app.services.zone import zone_crud
 
@@ -44,17 +47,14 @@ class CRUDCamera(CRUDBase):
         c = aliased(self.model)
         z = aliased(Zone)
 
-        q = select(c, z).join(c.zones)
+        q = select(c, z).select_from(c).join(c.zones)
 
         result = await session.execute(q)
-        cameras_with_zones = result.scalars().all()
+        cameras_with_zones = result.unique().scalars().all()
         return cameras_with_zones
 
 
-    async def get_cameras_and_zones_with_joined_relationship (self, session: AsyncSession):
-
-        # Extraction with joinedload and relationship
-
+    async def get_cameras_and_zones_with_joinedload_relationship (self, session: AsyncSession):
         c = aliased(self.model)
         # q stands for query
         q = (
@@ -69,18 +69,39 @@ class CRUDCamera(CRUDBase):
         print(f'cameras_with_zones=`{cameras_with_zones}')
         return cameras_with_zones
 
-    async def get_cameras_and_zones_with_selectin_relationship (self, session: AsyncSession):
+    async def get_cameras_and_zones_with_selectin_relationship(self, session: AsyncSession):
+        q = (
+            select(self.model)
+            .select_from(self.model)
+            .options(selectinload(self.model.zones)))
 
-        # Extraction with selectinload and relationship
+        result = await session.execute(q)
+        # Add unique() to deal with repeating ids
+        cameras_with_zones_orm = result.unique().scalars().all()
+
+        # Render to a json compatible dictionary
+        cameras_with_zones_dto = [CameraWithZonesDTO.model_validate(obj, from_attributes=True)
+                                  for obj in cameras_with_zones_orm]
+        final_json_obj = jsonable_encoder({'cameras': cameras_with_zones_dto})
+        return final_json_obj
+
+
+        # # Render to a json string
+        # cameras_wio = [CameraWithZonesDTO.model_validate(obj, from_attributes=True).model_dump()
+        #                           for obj in cameras_with_zones_orm]
+        # final_json_obj = json.dumps({'cameras': cameras_with_zones_dto})
+        # return final_json_obj
+
+    async def get_cameras_and_zones_with_contains_eager(self, session: AsyncSession):
+        # Extraction with join and contains_eager and relationship
 
         c = aliased(self.model)
         q = (
             select(c)
-            .options(selectinload(c.zones))
-        )
+            .join(c.zones)
+            .options(contains_eager(c.zones)))
 
         result = await session.execute(q)
-        # Add unique() to deal with repeating ids
         cameras_with_zones = result.unique().scalars().all()
         print(f'cameras_with_zones=`{cameras_with_zones}')
         return cameras_with_zones
