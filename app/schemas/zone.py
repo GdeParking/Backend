@@ -1,6 +1,9 @@
 from pydantic import BaseModel, Extra
-from enum import Enum
 
+
+class UpdatedStatusDTO(BaseModel):
+    internal_id: int
+    status: int
 
 
 class ZoneToFront(BaseModel):

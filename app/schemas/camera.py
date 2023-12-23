@@ -44,10 +44,11 @@ class ZoneDTO(BaseModel):
     internal_id: int
     long: float
     lat: float
-    x: int
-    y: int
-    w: int
-    h: int
+    x: float
+    y: float
+    w: float
+    h: float
+    status: bool
 
 class CameraWithZonesDTO(CameraDTO):
     zones: list["ZoneDTO"]

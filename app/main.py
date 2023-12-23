@@ -31,6 +31,6 @@ app.include_router(api_router)
 app.include_router(admin_router)
 
 if __name__=='__main__':
-    uvicorn.run(app, host='0.0.0.0', port=8000)
-# with get_async_session() as session:
-#     camera_crud.get_cameras_and_zones_with_joined_relationship(session)
+    uvicorn.run(app='app.main:app',
+                reload=True)
+

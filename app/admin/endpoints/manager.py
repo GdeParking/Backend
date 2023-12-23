@@ -25,6 +25,9 @@ async def add_camera(form_data: TestForm = Depends(TestForm.as_form),
                      session: AsyncSession = Depends(get_async_session)):
     camera_metadata = dict(form_data)
     flattened_zones = flatten_zone_data(coordinates_file=coordinates, layout_file=layout)
+    for flattened_zone in flattened_zones:
+        print(flattened_zone)
+        print()
 
     # Create a new camera record in the database if the camera is not there yet
     existing_camera = await camera_crud.get(camera_metadata, session)
@@ -37,4 +40,4 @@ async def add_camera(form_data: TestForm = Depends(TestForm.as_form),
         new_camera = await camera_crud.create(camera_metadata, session)
         await zone_crud.add_zones(camera_id=new_camera.id, zones=flattened_zones, session=session)
 
-    return {"message": "Camera information and file uploaded successfully" }
+    return {"message": "Camera information and file uploaded successfully"}
