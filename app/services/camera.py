@@ -10,38 +10,48 @@ from app.services.base import CRUDBase
 
 class CRUDCamera(CRUDBase):
 
-    async def get(self, camera_metadata: dict, session: AsyncSession):
+    model = Camera
+
+
+    @classmethod
+    async def get(cls, camera_metadata: dict, session: AsyncSession):
         camera = await session.execute(
-            select(self.model).where(
-                self.model.cam_url == camera_metadata['cam_url']
+            select(cls.model).where(
+                cls.model.cam_url == camera_metadata['cam_url']
             )
         )
         camera = camera.scalars().first()
         return camera
+   
 
-    async def get_by_id(self, camera_id: int, session: AsyncSession):
-        q = select(self.model).where(self.model.id == camera_id)
+    @classmethod
+    async def get_by_id(cls, camera_id: int, session: AsyncSession):
+        q = select(cls.model).where(cls.model.id == camera_id)
         result = await session.execute(q)
         camera = result.scalars().one()
         return camera
 
-    async def get_all(self, session: AsyncSession):
-        q = select(self.model)
+
+    @classmethod
+    async def get_all(cls, session: AsyncSession):
+        q = select(cls.model)
         result = await session.execute(q)
         cameras = result.scalars().all()
         return cameras
 
-    async def get_united(self, session: AsyncSession):
-        q = select(self.model)
+    @classmethod
+    async def get_united(cls, session: AsyncSession):
+        q = select(cls.model)
         result = await session.execute(q)
         cameras = result.scalars().all()
         return cameras
 
 
-    async def get_cameras_and_zones_with_join (self, session: AsyncSession):
+    @classmethod
+    async def get_cameras_and_zones_with_join (cls, session: AsyncSession):
 
         # Extraction with sa orm (core?) using join. # TODO: sort out columns with same names
-        c = aliased(self.model)
+        c = aliased(cls.model)
         z = aliased(Zone)
 
         q = select(c, z).select_from(c).join(c.zones)
@@ -51,8 +61,9 @@ class CRUDCamera(CRUDBase):
         return cameras_with_zones
 
 
-    async def get_cameras_and_zones_with_joinedload_relationship (self, session: AsyncSession):
-        c = aliased(self.model)
+    @classmethod
+    async def get_cameras_and_zones_with_joinedload_relationship (cls, session: AsyncSession):
+        c = aliased(cls.model)
         # q stands for query
         q = (
             select(c)
@@ -66,10 +77,12 @@ class CRUDCamera(CRUDBase):
         print(f'cameras_with_zones=`{cameras_with_zones}')
         return cameras_with_zones
 
-    async def get_cameras_zones_selectin(self, session: AsyncSession):
+
+    @classmethod
+    async def get_cameras_zones_selectin(cls, session: AsyncSession):
         q = (
-            select(self.model)
-            .options(selectinload(self.model.zones))
+            select(cls.model)
+            .options(selectinload(cls.model.zones))
             )
 
         result = await session.execute(q)
@@ -82,10 +95,12 @@ class CRUDCamera(CRUDBase):
         final_json_obj = jsonable_encoder({'cameras': cameras_with_zones_dto})
         return final_json_obj
 
-    async def get_cameras_and_zones_with_contains_eager(self, session: AsyncSession):
+    
+    @classmethod
+    async def get_cameras_and_zones_with_contains_eager(cls, session: AsyncSession):
         # Extraction with join and contains_eager and relationship
 
-        c = aliased(self.model)
+        c = aliased(cls.model)
         q = (
             select(c)
             .join(c.zones)
@@ -96,24 +111,28 @@ class CRUDCamera(CRUDBase):
         print(f'cameras_with_zones=`{cameras_with_zones}')
         return cameras_with_zones
 
-    async def create(self, camera_metadata, session: AsyncSession):
-        data_to_save = self.model(**camera_metadata)
+
+    @classmethod
+    async def create(cls, camera_metadata, session: AsyncSession):
+        data_to_save = cls.model(**camera_metadata)
         session.add(data_to_save)
         await session.commit()
         await session.refresh(data_to_save)
         camera_obj = await session.execute(
-            select(self.model).where(
-                self.model.cam_url == camera_metadata['cam_url']
+            select(cls.model).where(
+                cls.model.cam_url == camera_metadata['cam_url']
             )
         )
         camera_obj = camera_obj.scalars().first()
         return camera_obj
 
-    async def get_camera_zones_selectin(self, camera_id: int, session: AsyncSession):
+
+    @classmethod
+    async def get_camera_zones_selectin(cls, camera_id: int, session: AsyncSession):
         q = (
-            select(self.model)
+            select(cls.model)
             .filter_by(id=camera_id)
-            .options(selectinload(self.model.zones))
+            .options(selectinload(cls.model.zones))
             )
 
         result = await session.execute(q)
@@ -124,7 +143,9 @@ class CRUDCamera(CRUDBase):
         final_json_obj = jsonable_encoder(camera_with_zones_dto)
         return final_json_obj
 
-    async def update(self, existing_camera, camera_metadata: dict, session: AsyncSession):
+
+    @classmethod
+    async def update(cls, existing_camera, camera_metadata: dict, session: AsyncSession):
         for field, value in camera_metadata.items():
             setattr(existing_camera, field, value)
 
@@ -133,5 +154,4 @@ class CRUDCamera(CRUDBase):
         await session.refresh(existing_camera)
         return existing_camera
 
-camera_crud = CRUDCamera(Camera)
 

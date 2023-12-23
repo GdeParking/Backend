@@ -3,9 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_async_session
 from app.schemas.camera import TestForm
-from app.services.camera import camera_crud
+from app.services.camera import CRUDCamera
 from app.services.utils import flatten_zone_data
-from app.services.zone import zone_crud
+from app.services.zone import CRUDZone
 
 # TODO: recommended structure
 # TODO: comments
@@ -30,14 +30,14 @@ async def add_camera(form_data: TestForm = Depends(TestForm.as_form),
         print()
 
     # Create a new camera record in the database if the camera is not there yet
-    existing_camera = await camera_crud.get(camera_metadata, session)
+    existing_camera = await CRUDCamera.get(camera_metadata, session)
     if existing_camera:
-        await camera_crud.update(existing_camera, camera_metadata, session)
-        await zone_crud.delete_zones(existing_camera.id, session)
-        await zone_crud.add_zones(camera_id=existing_camera.id, zones=flattened_zones, session=session)
+        await CRUDCamera.update(existing_camera, camera_metadata, session)
+        await CRUDZone.delete_zones(existing_camera.id, session)
+        await CRUDZone.add_zones(camera_id=existing_camera.id, zones=flattened_zones, session=session)
 
     else:
-        new_camera = await camera_crud.create(camera_metadata, session)
-        await zone_crud.add_zones(camera_id=new_camera.id, zones=flattened_zones, session=session)
+        new_camera = await CRUDCamera.create(camera_metadata, session)
+        await CRUDZone.add_zones(camera_id=new_camera.id, zones=flattened_zones, session=session)
 
     return {"message": "Camera information and file uploaded successfully"}

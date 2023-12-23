@@ -6,9 +6,6 @@ from app.admin.routers import admin_router
 from app.core.config import settings
 import uvicorn
 
-from app.core.db import get_async_session
-from app.services.camera import camera_crud
-
 app = FastAPI(
     title=settings.app_title,
     description=settings.app_description
