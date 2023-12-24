@@ -12,7 +12,7 @@ class CRUDCamera(CRUDBase):
 
     model = Camera
 
-
+"""Deprecated. CRUDBase parent method is used instead"""
     @classmethod
     async def get(cls, camera_metadata: dict, session: AsyncSession):
         camera = await session.execute(
@@ -23,7 +23,7 @@ class CRUDCamera(CRUDBase):
         camera = camera.scalars().first()
         return camera
    
-
+"""Deprecated. CRUDBase parent method is used instead"""
     @classmethod
     async def get_by_id(cls, camera_id: int, session: AsyncSession):
         q = select(cls.model).where(cls.model.id == camera_id)
@@ -31,16 +31,9 @@ class CRUDCamera(CRUDBase):
         camera = result.scalars().one()
         return camera
 
-
+"""Deprecated. CRUDBase parent method is used instead"""
     @classmethod
     async def get_all(cls, session: AsyncSession):
-        q = select(cls.model)
-        result = await session.execute(q)
-        cameras = result.scalars().all()
-        return cameras
-
-    @classmethod
-    async def get_united(cls, session: AsyncSession):
         q = select(cls.model)
         result = await session.execute(q)
         cameras = result.scalars().all()
@@ -144,14 +137,15 @@ class CRUDCamera(CRUDBase):
         return final_json_obj
 
 
+"""Deprecated. CRUDBase parent method is used instead"""
     @classmethod
     async def update(cls, existing_camera, camera_metadata: dict, session: AsyncSession):
         for field, value in camera_metadata.items():
             setattr(existing_camera, field, value)
 
         session.add(existing_camera)
-        await session.commit()
         await session.refresh(existing_camera)
+        await session.commit()
         return existing_camera
 
 

@@ -1,7 +1,7 @@
 from typing import List
 
 import httpx
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query, Body
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_async_session
@@ -38,6 +38,12 @@ async def get_all_cameras(session: AsyncSession = Depends(get_async_session)):
 async def get_all_with_zones(session: AsyncSession = Depends(get_async_session)):
     return await CRUDCamera.get_cameras_zones_selectin(session)
 
+@router.get('/get_by_url')
+async def get_by_url(cam_url: str = Query(...), session: AsyncSession = Depends(get_async_session)):
+    cam_url_filter = {'cam_url': cam_url}
+    print(cam_url_filter)
+    return await CRUDCamera.get_one_or_none(session, **cam_url_filter)  # For test: {'cam_url': 'https://moidom.citylink.pro/pub/89131'}
+
 @router.get('/{camera_id}')
 async def get_camera(
         camera_id: int,
@@ -67,5 +73,11 @@ async def post_camera_updated_zones(
     print(camera_updated_zones)
     return camera_updated_zones
 
-
+@router.post('/update_camera')
+async def update_camera(
+        filters: dict = Body(...),
+        data: dict = Body(...), 
+        session: AsyncSession = Depends(get_async_session),
+):
+    await CRUDCamera.update(session, filters, **data)
 

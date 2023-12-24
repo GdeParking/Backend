@@ -24,15 +24,17 @@ async def add_camera(form_data: TestForm = Depends(TestForm.as_form),
                      coordinates: UploadFile = File(...),
                      session: AsyncSession = Depends(get_async_session)):
     camera_metadata = dict(form_data)
+    cam_url_filter = {'cam_url': camera_metadata['cam_url']}
     flattened_zones = flatten_zone_data(coordinates_file=coordinates, layout_file=layout)
     for flattened_zone in flattened_zones:
         print(flattened_zone)
         print()
 
     # Create a new camera record in the database if the camera is not there yet
-    existing_camera = await CRUDCamera.get(camera_metadata, session)
+    existing_camera = await CRUDCamera.get_one_or_none(session=session, **cam_url_filter)
     if existing_camera:
-        await CRUDCamera.update(existing_camera, camera_metadata, session)
+        id_filter = {'id': existing_camera.id}
+        await CRUDCamera.update(session=session, filters=id_filter, **camera_metadata)
         await CRUDZone.delete_zones(existing_camera.id, session)
         await CRUDZone.add_zones(camera_id=existing_camera.id, zones=flattened_zones, session=session)
 
