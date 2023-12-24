@@ -1,10 +1,10 @@
 import json
 from typing import List
 
-from sqlalchemy import select, delete, text, update, and_, case
+from sqlalchemy import select, update, case
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models import Zone, Camera
+from app.models import Zone
 from app.schemas.zone import UpdatedStatusDTO
 from app.services.base import CRUDBase
 
@@ -12,14 +12,6 @@ from app.services.base import CRUDBase
 class CRUDZone(CRUDBase):
 
     model = Zone
-
-    
-    @classmethod
-    async def get_all(cls, session: AsyncSession):
-        q = select(cls.model)
-        result = await session.execute(q)
-        zones = result.scalars().all()
-        return zones
 
 
     @classmethod
@@ -33,29 +25,7 @@ class CRUDZone(CRUDBase):
 
 
     @classmethod
-    async def add_zones(cls, camera_id: int, zones: list, session: AsyncSession):
-        zone_objects = [
-            cls.model(**{**zone, 'camera_id': camera_id}) for zone in zones
-        ]
-        session.add_all(zone_objects)
-        await session.commit()
-
-
-    @classmethod
-    async def delete_zones(cls, camera_id: int, session: AsyncSession):
-        existing_zones = await session.execute(
-            select(cls.model).where(cls.model.camera_id == camera_id)
-        )
-        existing_zones = existing_zones.scalars().all()
-
-        if existing_zones:
-            zone_ids_to_delete = [zone.id for zone in existing_zones]
-            await session.execute(
-                delete(cls.model).where(cls.model.id.in_(zone_ids_to_delete)))
-            await session.commit()
-
-
-    @classmethod
+    # case(*whens, [value, else_])
     async def update_camera_zones(cls,
                                   cam_id: int,
                                   updated_statuses: List[UpdatedStatusDTO],
@@ -66,6 +36,7 @@ class CRUDZone(CRUDBase):
         whens = [
             (cls.model.internal_id == zone['internal_id'], zone['status'])
             for zone in pred_data
+
         ]
         stmt = (
                 update(cls.model)

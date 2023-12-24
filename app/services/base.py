@@ -1,4 +1,4 @@
-from sqlalchemy import insert, select, update
+from sqlalchemy import case, delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -46,8 +46,10 @@ class CRUDBase:
         
        
     @classmethod
-    async def add_bulk(cls, session: AsyncSession, data: list):
-        pass
+    async def add_bulk(cls, session: AsyncSession, data: list[dict]):
+        objects = [cls.model(**obj) for obj in data]
+        session.add_all(objects)
+        await session.commit()
 
 
     @classmethod
@@ -59,11 +61,39 @@ class CRUDBase:
         )
         await session.execute(stmt)
         await session.commit()
-        
 
 
+    @classmethod
+    async def update_bulk(cls, session: AsyncSession, update_by: str, filters: dict, data: list[dict]):
+        pass
+        # whens = {getattr(cls.model, update_by):obj for obj in data}
+        # print(whens)
+
+        # columns = data[0].keys()
+
+        # whens = [
+        #     (cls.model.internal_id == obj['internal_id'], obj) 
+        #     for obj in data
+        # ]
+        # stmt = (
+        #     update(cls.model)
+        #     .values(
+        #         case(
+        #             *whens,
+        #         )
+        #     )
+        #     .filter_by(**filters)
+        # )
+        # await session.execute(stmt)
+        # await session.commit()        
 
 
+    @classmethod
+    async def delete(cls, session: AsyncSession, **filters):
+        stmt = delete(cls.model).filter_by(**filters)
+        result = await session.execute(stmt)
+        await session.commit()
+        #return result.rowcount
 
 
 
