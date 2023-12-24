@@ -12,34 +12,6 @@ class CRUDCamera(CRUDBase):
 
     model = Camera
 
-"""Deprecated. CRUDBase parent method is used instead"""
-    @classmethod
-    async def get(cls, camera_metadata: dict, session: AsyncSession):
-        camera = await session.execute(
-            select(cls.model).where(
-                cls.model.cam_url == camera_metadata['cam_url']
-            )
-        )
-        camera = camera.scalars().first()
-        return camera
-   
-"""Deprecated. CRUDBase parent method is used instead"""
-    @classmethod
-    async def get_by_id(cls, camera_id: int, session: AsyncSession):
-        q = select(cls.model).where(cls.model.id == camera_id)
-        result = await session.execute(q)
-        camera = result.scalars().one()
-        return camera
-
-"""Deprecated. CRUDBase parent method is used instead"""
-    @classmethod
-    async def get_all(cls, session: AsyncSession):
-        q = select(cls.model)
-        result = await session.execute(q)
-        cameras = result.scalars().all()
-        return cameras
-
-
     @classmethod
     async def get_cameras_and_zones_with_join (cls, session: AsyncSession):
 
@@ -106,21 +78,6 @@ class CRUDCamera(CRUDBase):
 
 
     @classmethod
-    async def create(cls, camera_metadata, session: AsyncSession):
-        data_to_save = cls.model(**camera_metadata)
-        session.add(data_to_save)
-        await session.commit()
-        await session.refresh(data_to_save)
-        camera_obj = await session.execute(
-            select(cls.model).where(
-                cls.model.cam_url == camera_metadata['cam_url']
-            )
-        )
-        camera_obj = camera_obj.scalars().first()
-        return camera_obj
-
-
-    @classmethod
     async def get_camera_zones_selectin(cls, camera_id: int, session: AsyncSession):
         q = (
             select(cls.model)
@@ -137,15 +94,5 @@ class CRUDCamera(CRUDBase):
         return final_json_obj
 
 
-"""Deprecated. CRUDBase parent method is used instead"""
-    @classmethod
-    async def update(cls, existing_camera, camera_metadata: dict, session: AsyncSession):
-        for field, value in camera_metadata.items():
-            setattr(existing_camera, field, value)
-
-        session.add(existing_camera)
-        await session.refresh(existing_camera)
-        await session.commit()
-        return existing_camera
 
 

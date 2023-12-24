@@ -30,11 +30,25 @@ class CRUDBase:
 
     @classmethod
     async def add(cls, session: AsyncSession, **data):
-        stmt = insert(cls.model).values(**data).returning(cls.model.id) 
-        result = await session.execute(stmt)
+        """ORM approach"""
+        new_obj = cls.model(**data)
+        session.add(new_obj)
         await session.commit()
-        return result.scalar_one_or_none()
-    
+        await session.refresh(new_obj)
+        return new_obj 
+
+        """Core approach that doesn't work"""
+        # stmt = insert(cls.model).values(**data) #.returning(cls.model)
+        # result = await session.execute(stmt)
+        # await session.flush()
+        # await session.commit()
+        # return result.scalar_one_or_none()
+        
+       
+    @classmethod
+    async def add_bulk(cls, session: AsyncSession, data: list):
+        pass
+
 
     @classmethod
     async def update(cls, session: AsyncSession, filters: dict, **data):
