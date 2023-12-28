@@ -22,6 +22,7 @@ async def update_camera_zones(
         cam_id: int,
         updated_statuses: List[UpdatedStatusDTO],
         session: AsyncSession = Depends(get_async_session)):
+    
     await CRUDZone.update_camera_zones(cam_id, updated_statuses, session)
     return await CRUDCamera.get_cameras_and_zones_with_selectin_relationship(session)
 

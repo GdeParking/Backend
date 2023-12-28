@@ -10,6 +10,8 @@ from app.services.zone import CRUDZone
 
 manager_router = APIRouter()
 
+# Break down into smaller chunks
+
 @manager_router.post("/upload-camera")
 # The endpoint utilizes as_form classmethod
 async def add_camera(form_data: TestForm = Depends(TestForm.as_form),

@@ -12,7 +12,7 @@ from app.schemas.camera import CameraInput
 
 router = APIRouter()
 
-
+# TODO: clean out unrelated endpoints
 @router.post('/')
 async def camera_input(
         camera: CameraInput,
