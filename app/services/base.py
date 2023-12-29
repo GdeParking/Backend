@@ -2,7 +2,7 @@ from sqlalchemy import case, delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-class CRUDBase:
+class  CRUDBase:
 
     model = None
 
@@ -38,10 +38,10 @@ class CRUDBase:
         return new_obj 
 
         """Core approach that doesn't work"""
-        # stmt = insert(cls.model).values(**data) #.returning(cls.model)
+        # stmt = insert(cls.model).values(**data).returning(cls.model.id)
         # result = await session.execute(stmt)
-        # await session.flush()
         # await session.commit()
+        # await session.flush()
         # return result.scalar_one_or_none()
         
        

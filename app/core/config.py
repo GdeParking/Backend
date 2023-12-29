@@ -1,5 +1,4 @@
-from pydantic import Extra
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pathlib import Path
 
 
@@ -10,10 +9,10 @@ class Settings(BaseSettings):
     secret: str = 'Seacret'
 
 
+    model_config = SettingsConfigDict(env_file=".env", extra="allow")
 
-    class Config:
-        extra = Extra.ignore
-        env_file = Path(__file__).parents[2]/'.env'
-
+    # class Config:
+    #     extra = Extra.ignore
+    #     env_file = Path(__file__).parents[2]/'.env'
 
 settings = Settings()

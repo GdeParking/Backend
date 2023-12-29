@@ -1,7 +1,11 @@
+import sys
+import os
+
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import DeclarativeBase, declarative_base, declared_attr, sessionmaker, Mapped, mapped_column
 
 from app.core.config import settings
+
 
 """"The old way to define Base"""
 # class PreBase:
@@ -46,7 +50,6 @@ engine = create_async_engine(url=settings.database_url,
                              )
 
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession)
-
 
 async def get_async_session():
     async with AsyncSessionLocal() as asyncsession:
