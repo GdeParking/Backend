@@ -1,38 +1,26 @@
 from typing import List
 
 import httpx
-from fastapi import APIRouter, Depends, Query, Body
+from fastapi import APIRouter, Depends, Query, Body, Request
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.auth.auth import get_current_user
 
 from app.core.db import get_async_session
+from app.models.user import User
 from app.schemas.zone import UpdatedStatusDTO
 from app.services.camera import CRUDCamera
 from app.services.zone import CRUDZone
-from app.schemas.camera import CameraInput
 
 router = APIRouter()
 
 # TODO: clean out unrelated endpoints
-@router.post('/')
-async def camera_input(
-        camera: CameraInput,
-        session: AsyncSession = Depends(get_async_session),
-):
-    existing_camera = await CRUDCamera.get_object(camera, session)
-    if existing_camera:
-        updated_camera = await CRUDCamera.update(
-            camera, existing_camera, session
-        )
-        await CRUDZone.update_zones(camera, updated_camera.id, session)
-        return updated_camera
-    new_camera = await CRUDCamera.create(camera, session)
-    await CRUDZone.update_zones(camera, new_camera.id, session)
-    return new_camera
 
 
 @router.get('/all')
-async def get_all_cameras(session: AsyncSession = Depends(get_async_session)):
-    return await CRUDCamera.get_all(session)
+async def get_all_cameras(user: User = Depends(get_current_user),
+                          session: AsyncSession = Depends(get_async_session)):
+    if user:
+        return await CRUDCamera.get_all(session)
 
 @router.get('/get_all_with_zones')
 async def get_all_with_zones(session: AsyncSession = Depends(get_async_session)):

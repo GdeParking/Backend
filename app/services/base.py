@@ -11,8 +11,8 @@ class  CRUDBase:
     async def get_by_id(cls, session: AsyncSession, model_id: int):
         query = select(cls.model).filter_by(id=model_id)
         result = await session.execute(query)
-        return result.scalar_one_or_none()
-
+        return result.mappings().one_or_none()
+    
 
     @classmethod
     async def get_one_or_none(cls, session: AsyncSession, **filters: dict):
