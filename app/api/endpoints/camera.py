@@ -1,3 +1,5 @@
+import asyncio
+
 from typing import List
 
 import httpx
@@ -11,10 +13,12 @@ from app.schemas.zone import UpdatedStatusDTO
 from app.services.camera import CRUDCamera
 from app.services.zone import CRUDZone
 
+from fastapi_cache.decorator import cache
+
+
 router = APIRouter()
 
 # TODO: clean out unrelated endpoints
-
 
 @router.get('/all')
 async def get_all_cameras(user: User = Depends(get_current_user),
@@ -23,7 +27,9 @@ async def get_all_cameras(user: User = Depends(get_current_user),
         return await CRUDCamera.get_all(session)
 
 @router.get('/get_all_with_zones')
+@cache(expire=20)
 async def get_all_with_zones(session: AsyncSession = Depends(get_async_session)):
+    await asyncio.sleep(3)
     return await CRUDCamera.get_cameras_zones_selectin(session)
 
 @router.get('/get_by_url')
