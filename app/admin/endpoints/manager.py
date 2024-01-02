@@ -2,10 +2,11 @@ from fastapi import APIRouter, Depends, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import get_async_session
-from app.schemas.camera import TestForm
+from app.schemas.camera import CameraDTO, TestForm, CameraDTOWithoutID
 from app.services.camera import CRUDCamera
 from app.services.utils import flatten_zone_data
 from app.services.zone import CRUDZone
+from app.tasks.tasks import send_created_camera_email
 
 
 manager_router = APIRouter()
@@ -35,8 +36,10 @@ async def add_camera(form_data: TestForm = Depends(TestForm.as_form),
         
     else:
         new_camera = await CRUDCamera.add(session, **camera_metadata)
+        print(new_camera)
+        new_camera_dict = CameraDTOWithoutID.model_validate(new_camera).model_dump()
+        send_created_camera_email.delay(new_camera_dict)
         # Camera_id is added to every zone dict
         flattened_zones_with_cam_id= [{**zone, 'camera_id': new_camera.id} for zone in flattened_zones]
         await CRUDZone.add_bulk(session, flattened_zones_with_cam_id)
-
-    return {"message": "Camera information and file uploaded successfully"}
+        return new_camera

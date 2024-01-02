@@ -61,7 +61,8 @@ async def post_camera_updated_zones(
     # TODO: move post inside CRUD?
     # TODO: check camera_updated_zones format needed for Sergey
     # TODO: check zone statuses by eyes
-    frontend_url = f"http://localhost:3000/api/get_zone_statuses?cam_id={id}"
+    # TOOD: try using returning instead of 2 SQL queries
+    frontend_url = f"http://localhost:3000/api/get_updated_zones/{id}"
     async with httpx.AsyncClient() as client:
         await client.post(frontend_url, json=camera_updated_zones)
     print(camera_updated_zones)
