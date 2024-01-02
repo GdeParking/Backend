@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from fastapi import Form, UploadFile, File
-from pydantic import BaseModel, Extra, HttpUrl
+from pydantic import BaseModel, ConfigDict, Extra, HttpUrl
 
 from app.models.enums import UTCTimeZone
 from app.schemas.zone import ZoneToFront
@@ -32,20 +32,20 @@ class TestForm(BaseModel):
         )
 
 class CameraDTO(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     cam_url: str
     address: str
     parking_places: int
 
-    class Config:
-        orm_mode = True
 
 class CameraDTOWithoutID(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     cam_url: str
     address: str
 
-    class Config:
-        orm_mode = True
 
 class ZoneDTO(BaseModel):
     internal_id: int
