@@ -37,6 +37,16 @@ class CameraDTO(BaseModel):
     address: str
     parking_places: int
 
+    class Config:
+        orm_mode = True
+
+class CameraDTOWithoutID(BaseModel):
+    cam_url: str
+    address: str
+
+    class Config:
+        orm_mode = True
+
 class ZoneDTO(BaseModel):
     internal_id: int
     long: float
