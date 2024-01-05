@@ -1,9 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.admin.views import CameraAdmin, ZoneAdmin
 
 from app.api.routers import api_router
 from app.admin.routers import admin_router
 from app.core.config import settings
+from app.core.db import engine
 import uvicorn
 
 from contextlib import asynccontextmanager
@@ -11,6 +13,10 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 
 from redis import asyncio as aioredis
+from sqladmin import Admin
+
+
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -46,6 +52,11 @@ app.include_router(admin_router)
 #     redis = aioredis.from_url("redis://localhost")
 #     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
 
+
+admin = Admin(app, engine)
+
+admin.add_view(CameraAdmin)
+admin.add_view(ZoneAdmin)
 
 
 if __name__=='__main__':

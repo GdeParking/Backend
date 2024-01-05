@@ -20,3 +20,6 @@ class Camera(Base, TimestampMixin):
 
     repr_cols_num = 5
     repr_cols = tuple()
+
+    def __str__(self):
+        return f"Camera {self.address.split(',')[0]}"
