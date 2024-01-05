@@ -4,8 +4,6 @@ from fastapi import Depends, HTTPException, Request, status
 from passlib.context import CryptContext
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
-from secrets import token_bytes
-from base64 import b64encode
 
 from pydantic import EmailStr
 from app.core.config import settings
@@ -15,8 +13,8 @@ from app.services.user import CRUDUser
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
-# To get secret key for jwt
-# print(b64encode(token_bytes(32)).decode())
+# To get secret key for jwt in terminal
+# python -c "from secrets import token_bytes; from base64 import b64encode; print(b64encode(token_bytes(32)).decode())"
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
