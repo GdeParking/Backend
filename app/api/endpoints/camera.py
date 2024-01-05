@@ -1,9 +1,10 @@
 import asyncio
 
 from typing import List
+from fastapi.responses import HTMLResponse, FileResponse
 
 import httpx
-from fastapi import APIRouter, Depends, Query, Body, Request
+from fastapi import APIRouter, Depends, Query, Body, Request, WebSocket, WebSocketDisconnect
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.auth import get_current_user
 
@@ -14,11 +15,14 @@ from app.services.camera import CRUDCamera
 from app.services.zone import CRUDZone
 
 from fastapi_cache.decorator import cache
+from app.services.utils import broadcast_updated_zones
+
 
 
 router = APIRouter()
 
 # TODO: clean out unrelated endpoints
+
 
 @router.get('/all')
 async def get_all_cameras(user: User = Depends(get_current_user),
@@ -49,24 +53,34 @@ async def get_camera(
 async def get_camera_with_zones_by_id(camera_id: int, session: AsyncSession = Depends(get_async_session)):
     return await CRUDCamera.get_camera_zones_selectin(camera_id, session)
 
-@router.post('/post_camera_updated_zones')
-async def post_camera_updated_zones(
-        cam_id: int,
-        updated_statuses: List[UpdatedStatusDTO],
-        session: AsyncSession = Depends(get_async_session)):
 
-    await CRUDZone.update_camera_zones(cam_id, updated_statuses, session)
-    camera_updated_zones = await CRUDCamera.get_camera_zones_selectin(cam_id, session) # TODO: try to use returning
-    # TODO: get fronted_url from Sergey
+# TODO: get fronted_url from Sergey
     # TODO: move post inside CRUD?
     # TODO: check camera_updated_zones format needed for Sergey
     # TODO: check zone statuses by eyes
     # TOOD: try using returning instead of 2 SQL queries
-    frontend_url = f"http://localhost:3000/api/get_updated_zones/{id}"
-    async with httpx.AsyncClient() as client:
-        await client.post(frontend_url, json=camera_updated_zones)
+
+@router.post('/update_camera_zones')
+async def post_camera_updated_zones(
+        updated_statuses: List[UpdatedStatusDTO],
+        cam_id: int  = Query(...),
+        session: AsyncSession = Depends(get_async_session)):
+
+    await CRUDZone.update_camera_zones(cam_id, updated_statuses, session)
+    camera_updated_zones = await CRUDCamera.get_camera_zones_selectin(cam_id, session) # TODO: try to use returning
+    
+    await broadcast_updated_zones(camera_updated_zones)
+
     print(camera_updated_zones)
     return camera_updated_zones
+
+
+@router.post('/mock_update_camera_zones')
+async def post_camera_updated_zones():
+
+    await broadcast_updated_zones({"Mishima Yukio": "Boris Akunin"})
+    return "Success"
+
 
 @router.post('/update_camera')
 async def update_camera(

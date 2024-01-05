@@ -1,10 +1,31 @@
 import csv
 import json
 from decimal import Decimal
-
+from fastapi import WebSocket
 from starlette.datastructures import UploadFile
 
 FORMAT = '%Y-%m-%d %H:%M:%S'
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: list[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def send_personal_message(self, message: str, websocket: WebSocket):
+        await websocket.send_text(message)
+
+    async def broadcast(self, message: str):
+        for connection in self.active_connections:
+            await connection.send_text(message)
+
+
+ws_manager = ConnectionManager()
 
 
 def process_coordinates_csv(uploaded_file: UploadFile):
@@ -38,3 +59,9 @@ def flatten_zone_data(coordinates_file: UploadFile, layout_file: UploadFile) -> 
         c_dict.update(l_dict)
         flattened_list_of_dicts.append(c_dict)
     return flattened_list_of_dicts
+
+
+async def broadcast_updated_zones(zones):
+    message = f"Updated Zones: {zones}"
+    await ws_manager.broadcast(message)
+    return message

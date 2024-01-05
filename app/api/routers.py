@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.endpoints import camera_router, zone_router, auth_router
+from app.api.endpoints import camera_router, zone_router, auth_router, chat_router, pages_router
 
 
 api_router = APIRouter(prefix='/api')
@@ -23,4 +23,15 @@ api_router.include_router(
     tags=["ZoneCRUD"]
 )
 
+api_router.include_router(
+    chat_router,
+    prefix="/chat",
+    tags=["Chat"]
+)
+
+api_router.include_router(
+    pages_router,
+    prefix="/pages",
+    tags=["Pages"]
+)
 
