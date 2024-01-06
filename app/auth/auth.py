@@ -21,8 +21,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
+
 def verify_password(password: str, hashed_password: str) -> bool:
     return pwd_context.verify(password, hashed_password)
+
 
 def create_token(data: dict) -> str:
     to_encode = data.copy()
@@ -33,15 +35,14 @@ def create_token(data: dict) -> str:
     )
     return encoded_jwt
     
-async def authenticate_user(session: AsyncSessionLocal, email: EmailStr, password: str):
+async def authenticate_user(email: EmailStr, password: str, session: AsyncSession):
+    # TODO: hide session to DAO layer
     user = await CRUDUser.get_one_or_none(session, email=email)
-    if not user and not verify_password(password, user.hashed_password):
+    if not user:
+        return None
+    if not  verify_password(password, user.hashed_password):
         return None
     return user 
-
-
-async def check_cookies(session: AsyncSessionLocal, request: Request):
-    user_token = request.cookies["camera_manager_token"]
 
 
 def get_token(request: Request):

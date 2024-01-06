@@ -14,6 +14,7 @@ from fastapi_cache.backends.redis import RedisBackend
 
 from redis import asyncio as aioredis
 from sqladmin import Admin
+from app.admin.auth import authentication_backend
 
 
 
@@ -53,7 +54,7 @@ app.include_router(admin_router)
 #     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
 
 
-admin = Admin(app, engine)
+admin = Admin(app, engine, authentication_backend=authentication_backend)
 
 admin.add_view(CameraAdmin)
 admin.add_view(ZoneAdmin)

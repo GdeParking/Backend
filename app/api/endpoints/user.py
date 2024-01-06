@@ -33,7 +33,7 @@ async def login_user(
     response: Response,
     user_data: UserBasicDTO,
     session: AsyncSession = Depends(get_async_session)):
-    user = await authenticate_user(session, user_data.email, user_data.password)
+    user = await authenticate_user(user_data.email, user_data.password, session)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     token = create_token({"sub": str(user.id)})
