@@ -50,11 +50,11 @@ engine = create_async_engine(url=settings.database_url,
 
 
 """The old overcomplicated way to create async session generator"""
-# AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession)
+AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession)
 
-# async def get_async_session():
-#     async with AsyncSessionLocal() as asyncsession:
-#         yield asyncsession
+async def get_async_session():
+    async with AsyncSessionLocal() as asyncsession:
+        yield asyncsession
 
 """The newer easier way to create async session generator"""
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)

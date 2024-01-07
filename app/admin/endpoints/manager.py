@@ -18,29 +18,28 @@ manager_router = APIRouter()
 # The endpoint utilizes as_form classmethod
 async def add_camera(form_data: TestForm = Depends(TestForm.as_form),
                      layout: UploadFile = File(...),
-                     coordinates: UploadFile = File(...),
-                     session: AsyncSession = Depends(get_async_session)):
+                     coordinates: UploadFile = File(...),):
     camera_metadata = dict(form_data)
     cam_url_filter = {'cam_url': camera_metadata['cam_url']}
     flattened_zones = flatten_zone_data(coordinates_file=coordinates, layout_file=layout)
 
     # Create a new camera record in the database if the camera is not there yet
-    existing_camera = await CRUDCamera.get_one_or_none(session=session, **cam_url_filter)
+    existing_camera = await CRUDCamera.get_one_or_none(**cam_url_filter)
     if existing_camera:
-        id_filter = {'id': existing_camera.id}
+        id_filter = {'id': existing_camera.id} # TODO: refactor 
         cam_id_filter = {'camera_id': existing_camera.id}
         # Camera_id is added to every zone dict
         flattened_zones_with_cam_id = [{**zone, 'camera_id': existing_camera.id} for zone in flattened_zones]
-        await CRUDCamera.update(session=session, filters=id_filter, **camera_metadata)
-        await CRUDZone.delete(session=session, **cam_id_filter)
-        await CRUDZone.add_bulk(session, flattened_zones_with_cam_id)
+        await CRUDCamera.update(filters=id_filter, **camera_metadata)
+        await CRUDZone.delete(**cam_id_filter)
+        await CRUDZone.add_bulk(flattened_zones_with_cam_id)
         
     else:
-        new_camera = await CRUDCamera.add(session, **camera_metadata)
+        new_camera = await CRUDCamera.add(**camera_metadata)
         print(new_camera)
         new_camera_dict = CameraDTOWithoutID.model_validate(new_camera).model_dump()
         send_created_camera_email.delay(new_camera_dict)
         # Camera_id is added to every zone dict
         flattened_zones_with_cam_id= [{**zone, 'camera_id': new_camera.id} for zone in flattened_zones]
-        await CRUDZone.add_bulk(session, flattened_zones_with_cam_id)
+        await CRUDZone.add_bulk(flattened_zones_with_cam_id)
         return new_camera
