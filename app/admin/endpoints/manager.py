@@ -9,6 +9,7 @@ from app.services.zone import CRUDZone
 from app.tasks.tasks import send_created_camera_email
 
 
+
 manager_router = APIRouter()
 
 # Break down into smaller chunks

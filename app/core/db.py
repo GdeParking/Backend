@@ -46,14 +46,21 @@ class Base(DeclarativeBase):
 
 
 engine = create_async_engine(url=settings.database_url,
-                             echo=True,
-                             )
-
-AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession)
-
-async def get_async_session():
-    async with AsyncSessionLocal() as asyncsession:
-        yield asyncsession
+                             echo=True,)
 
 
+"""The old overcomplicated way to create async session generator"""
+# AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession)
+
+# async def get_async_session():
+#     async with AsyncSessionLocal() as asyncsession:
+#         yield asyncsession
+
+"""The newer easier way to create async session generator"""
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
+
+
+"""For reference"""
+#         async with async_session_maker() as session:
+
+
