@@ -6,6 +6,7 @@ from sqlalchemy.orm import aliased, joinedload, selectinload, contains_eager, lo
 from app.models import Camera, Zone
 from app.schemas.camera import CameraWithZonesDTO, CameraWithZonesLabeledDTO
 from app.services.base import CRUDBase
+from app.core.db import async_session_maker
 
 
 class CRUDCamera(CRUDBase):
@@ -13,17 +14,17 @@ class CRUDCamera(CRUDBase):
     model = Camera
 
     @classmethod
-    async def get_cameras_and_zones_with_join (cls, session: AsyncSession):
+    async def get_cameras_and_zones_with_join (cls):
 
         # Extraction with sa orm (core?) using join. # TODO: sort out columns with same names
         c = aliased(cls.model)
         z = aliased(Zone)
 
         q = select(c, z).select_from(c).join(c.zones)
-
-        result = await session.execute(q)
-        cameras_with_zones = result.unique().scalars().all()
-        return cameras_with_zones
+        async with async_session_maker() as session:        
+            result = await session.execute(q)
+            cameras_with_zones = result.unique().scalars().all()
+            return cameras_with_zones
 
 
     @classmethod
@@ -34,13 +35,14 @@ class CRUDCamera(CRUDBase):
             select(c)
             .options(joinedload(c.zones))
         )
-
-        result = await session.execute(q)
-        print(f'result={result}')
-        # Add unique() to deal with repeating ids
-        cameras_with_zones = result.unique().scalars().all()
-        print(f'cameras_with_zones=`{cameras_with_zones}')
-        return cameras_with_zones
+        
+        async with async_session_maker() as session:        
+            result = await session.execute(q)
+            print(f'result={result}')
+            # Add unique() to deal with repeating ids
+            cameras_with_zones = result.unique().scalars().all()
+            print(f'cameras_with_zones=`{cameras_with_zones}')
+            return cameras_with_zones
 
 
     @classmethod
@@ -49,16 +51,16 @@ class CRUDCamera(CRUDBase):
             select(cls.model)
             .options(selectinload(cls.model.zones))
             )
+        async with async_session_maker() as session:        
+            result = await session.execute(q)
 
-        result = await session.execute(q)
-
-        # Add unique() to deal with repeating ids
-        cameras_with_zones_orm = result.unique().scalars().all()
-        # Render to a json compatible dictionary
-        cameras_with_zones_dto = [CameraWithZonesDTO.model_validate(obj, from_attributes=True)
-                                  for obj in cameras_with_zones_orm]
-        final_json_obj = jsonable_encoder({'cameras': cameras_with_zones_dto})
-        return final_json_obj
+            # Add unique() to deal with repeating ids
+            cameras_with_zones_orm = result.unique().scalars().all()
+            # Render to a json compatible dictionary
+            cameras_with_zones_dto = [CameraWithZonesDTO.model_validate(obj, from_attributes=True)
+                                    for obj in cameras_with_zones_orm]
+            final_json_obj = jsonable_encoder({'cameras': cameras_with_zones_dto})
+            return final_json_obj
 
     
     @classmethod
@@ -70,11 +72,12 @@ class CRUDCamera(CRUDBase):
             select(c)
             .join(c.zones)
             .options(contains_eager(c.zones)))
-
-        result = await session.execute(q)
-        cameras_with_zones = result.unique().scalars().all()
-        print(f'cameras_with_zones=`{cameras_with_zones}')
-        return cameras_with_zones
+        
+        async with async_session_maker() as session:        
+            result = await session.execute(q)
+            cameras_with_zones = result.unique().scalars().all()
+            print(f'cameras_with_zones=`{cameras_with_zones}')
+            return cameras_with_zones
 
 
     @classmethod
@@ -84,14 +87,15 @@ class CRUDCamera(CRUDBase):
             .filter_by(id=camera_id)
             .options(selectinload(cls.model.zones))
             )
-
-        result = await session.execute(q)
-        # Add unique() to deal with repeating ids
-        camera_with_zones_orm = result.unique().scalars().one()
-        # Render to a json compatible dictionary
-        camera_with_zones_dto = CameraWithZonesDTO.model_validate(camera_with_zones_orm, from_attributes=True)
-        final_json_obj = jsonable_encoder(camera_with_zones_dto)
-        return final_json_obj
+        
+        async with async_session_maker() as session:        
+            result = await session.execute(q)
+            # Add unique() to deal with repeating ids
+            camera_with_zones_orm = result.unique().scalars().one()
+            # Render to a json compatible dictionary
+            camera_with_zones_dto = CameraWithZonesDTO.model_validate(camera_with_zones_orm, from_attributes=True)
+            final_json_obj = jsonable_encoder(camera_with_zones_dto)
+            return final_json_obj
 
 
 

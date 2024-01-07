@@ -1,4 +1,3 @@
-import sys
 from fastapi import Depends, HTTPException, Request, status
 
 from passlib.context import CryptContext
@@ -7,10 +6,8 @@ from datetime import datetime, timedelta
 
 from pydantic import EmailStr
 from app.core.config import settings
-from app.core.db import AsyncSessionLocal, get_async_session
 from app.core.exceptions import NoSuchUserException, WrongJWTTokenException
 from app.services.user import CRUDUser
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 # To get secret key for jwt in terminal
@@ -35,9 +32,8 @@ def create_token(data: dict) -> str:
     )
     return encoded_jwt
     
-async def authenticate_user(email: EmailStr, password: str, session: AsyncSession):
-    # TODO: hide session to DAO layer
-    user = await CRUDUser.get_one_or_none(session, email=email)
+async def authenticate_user(email: EmailStr, password: str):
+    user = await CRUDUser.get_one_or_none(email=email)
     if not user:
         return None
     if not  verify_password(password, user.hashed_password):
@@ -52,7 +48,7 @@ def get_token(request: Request):
     return token
 
 
-async def get_current_user(token: str = Depends(get_token), session: AsyncSession = Depends(get_async_session)):
+async def get_current_user(token: str = Depends(get_token)):
     try:
         payload = jwt.decode(token, settings.jwt_key, settings.jwt_algorithm)
 
@@ -63,7 +59,7 @@ async def get_current_user(token: str = Depends(get_token), session: AsyncSessio
 
     if not user_id:
         raise NoSuchUserException
-    user = await CRUDUser.get_one_or_none(session, id=int(user_id))
+    user = await CRUDUser.get_one_or_none(id=int(user_id))
     if not user:
         raise NoSuchUserException
     

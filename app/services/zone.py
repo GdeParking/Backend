@@ -2,11 +2,11 @@ import json
 from typing import List
 
 from sqlalchemy import select, update, case
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Zone
 from app.schemas.zone import UpdatedStatusDTO
 from app.services.base import CRUDBase
+from app.core.db import async_session_maker
 
 
 class CRUDZone(CRUDBase):
@@ -15,21 +15,22 @@ class CRUDZone(CRUDBase):
 
 
     @classmethod
-    async def get_xywh_of_zones_by_camera_id(cls, camera_id: int, session: AsyncSession):
+    async def get_xywh_of_zones_by_camera_id(cls, camera_id: int):
         q = select(Zone.internal_id, Zone.x, Zone.y, Zone.w, Zone.h).where(Zone.camera_id == camera_id)
-        result = await session.execute(q)
-        zones = result.all()
-        column_names = ('internal_id', 'x', 'y', 'w', 'h')
-        json_zones = [dict(zip(column_names, zone)) for zone in zones]
-        return json.dumps(json_zones)
+        
+        async with async_session_maker() as session:        
+            result = await session.execute(q)
+            zones = result.all()
+            column_names = ('internal_id', 'x', 'y', 'w', 'h')
+            json_zones = [dict(zip(column_names, zone)) for zone in zones]
+            return json.dumps(json_zones)
 
 
     @classmethod
     # case(*whens, [value, else_])
     async def update_camera_zones(cls,
                                   cam_id: int,
-                                  updated_statuses: List[UpdatedStatusDTO],
-                                  session: AsyncSession):
+                                  updated_statuses: List[UpdatedStatusDTO]):
         pred_data = [item.model_dump() for item in updated_statuses]
 
         # Comprise one big query with case when then
@@ -48,11 +49,11 @@ class CRUDZone(CRUDBase):
                 )
                 .where(cls.model.camera_id == cam_id)
             )
-
-        await session.execute(stmt)
-        await session.commit()
-        # TODO: unify what methods return format
-        return pred_data
+        async with async_session_maker() as session:        
+            await session.execute(stmt)
+            await session.commit()
+            # TODO: unify what methods return format
+            return pred_data
 
         # Running queries in cycle
         # for zone_pred_data in pred_data:
@@ -65,7 +66,8 @@ class CRUDZone(CRUDBase):
         #             and_(cls.model.camera_id == cam_id, cls.model.internal_id == internal_id)
         #         )
         #     )
-        #     await session.execute(stmt)
+        #     async with async_session_maker() as session:
+        #         await session.execute(stmt)
         # await session.commit()
         # return pred_data
 

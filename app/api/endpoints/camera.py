@@ -25,33 +25,29 @@ router = APIRouter()
 
 
 @router.get('/all')
-async def get_all_cameras(user: User = Depends(get_current_user),
-                          session: AsyncSession = Depends(get_async_session)):
+async def get_all_cameras(user: User = Depends(get_current_user)):
     if user:
-        return await CRUDCamera.get_all(session)
+        return await CRUDCamera.get_all()
 
 @router.get('/get_all_with_zones')
 @cache(expire=20)
-async def get_all_with_zones(session: AsyncSession = Depends(get_async_session)):
+async def get_all_with_zones():
     await asyncio.sleep(3)
-    return await CRUDCamera.get_cameras_zones_selectin(session)
+    return await CRUDCamera.get_cameras_zones_selectin()
 
 @router.get('/get_by_url')
-async def get_by_url(cam_url: str = Query(...), session: AsyncSession = Depends(get_async_session)):
+async def get_by_url(cam_url: str = Query(...)):
     cam_url_filter = {'cam_url': cam_url}
     print(cam_url_filter)
-    return await CRUDCamera.get_one_or_none(session, **cam_url_filter)  # For test: {'cam_url': 'https://moidom.citylink.pro/pub/89131'}
+    return await CRUDCamera.get_one_or_none(**cam_url_filter)  
 
 @router.get('/{camera_id}')
-async def get_camera(
-        camera_id: int,
-        session: AsyncSession = Depends(get_async_session),
-):
-    return await CRUDCamera.get_by_id(camera_id, session)
+async def get_camera(camera_id: int):
+    return await CRUDCamera.get_by_id(camera_id)
 
 @router.get('/get_camera_with_zones/{camera_id}')
-async def get_camera_with_zones_by_id(camera_id: int, session: AsyncSession = Depends(get_async_session)):
-    return await CRUDCamera.get_camera_zones_selectin(camera_id, session)
+async def get_camera_with_zones_by_id(camera_id: int):
+    return await CRUDCamera.get_camera_zones_selectin(camera_id)
 
 
 # TODO: get fronted_url from Sergey
@@ -63,11 +59,10 @@ async def get_camera_with_zones_by_id(camera_id: int, session: AsyncSession = De
 @router.post('/update_camera_zones')
 async def post_camera_updated_zones(
         updated_statuses: List[UpdatedStatusDTO],
-        cam_id: int  = Query(...),
-        session: AsyncSession = Depends(get_async_session)):
+        cam_id: int  = Query(...)):
 
-    await CRUDZone.update_camera_zones(cam_id, updated_statuses, session)
-    camera_updated_zones = await CRUDCamera.get_camera_zones_selectin(cam_id, session) # TODO: try to use returning
+    await CRUDZone.update_camera_zones(cam_id, updated_statuses)
+    camera_updated_zones = await CRUDCamera.get_camera_zones_selectin(cam_id) # TODO: try to use returning
     
     await broadcast_updated_zones(camera_updated_zones)
 
@@ -86,7 +81,6 @@ async def post_camera_updated_zones():
 async def update_camera(
         filters: dict = Body(...),
         data: dict = Body(...), 
-        session: AsyncSession = Depends(get_async_session),
 ):
-    await CRUDCamera.update(session, filters, **data)
+    await CRUDCamera.update(filters, **data)
 

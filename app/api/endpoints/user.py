@@ -12,28 +12,23 @@ from app.core.exceptions import EmailAlreadyExistsException, UsernameAlreadyExis
 
 router = APIRouter()
 
-# TODO: hide session into DAO layer?
 
 @router.post("/register")
-async def register_user(user_data: UserRegisterDTO,
-                        session: AsyncSession = Depends(get_async_session)):
-    existing_user = await CRUDUser.get_one_or_none(session, email=user_data.email)
+async def register_user(user_data: UserRegisterDTO):
+    existing_user = await CRUDUser.get_one_or_none(email=user_data.email)
     if existing_user:
         raise EmailAlreadyExistsException
     hashed_password = get_password_hash(user_data.password)
     print(hashed_password)
     try:
-        await CRUDUser.add(session, username = user_data.username, email=user_data.email, hashed_password=hashed_password)
+        await CRUDUser.add(username = user_data.username, email=user_data.email, hashed_password=hashed_password)
     except:
         raise UsernameAlreadyExistsException
 
 
 @router.post("/login")
-async def login_user(
-    response: Response,
-    user_data: UserBasicDTO,
-    session: AsyncSession = Depends(get_async_session)):
-    user = await authenticate_user(user_data.email, user_data.password, session)
+async def login_user(response: Response, user_data: UserBasicDTO):
+    user = await authenticate_user(user_data.email, user_data.password)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     token = create_token({"sub": str(user.id)})
